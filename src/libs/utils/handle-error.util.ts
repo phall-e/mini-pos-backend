@@ -5,6 +5,7 @@ import {
   NotFoundException,
   RequestTimeoutException,
   ServiceUnavailableException,
+  UnauthorizedException,
 } from '@nestjs/common';
 
 import {
@@ -21,6 +22,10 @@ export const handleError = (error: unknown): never => {
   }
 
   if (error instanceof BadRequestException) {
+    throw error;
+  }
+
+  if (error instanceof UnauthorizedException) {
     throw error;
   }
 

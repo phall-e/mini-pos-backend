@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { ModulesModule } from './modules/modules.module';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { ModulesModule } from './modules/modules.module';
     }),
     DatabaseModule,
     ModulesModule,
+    TelegramModule,
   ],
   controllers: [],
   providers: [],

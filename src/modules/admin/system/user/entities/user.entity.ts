@@ -39,6 +39,15 @@ export class UserEntity extends BaseEntity {
     password: string;
 
     @Column({
+        name: 'telegram_chat_id',
+        type: 'varchar',
+        length: '100',
+        unique: true,
+        nullable: true,
+    })
+    telegramChatId: string;
+
+    @Column({
         name: 'otp_code',
         type: 'varchar',
         length: 6,

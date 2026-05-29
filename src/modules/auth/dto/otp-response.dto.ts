@@ -3,13 +3,14 @@ import { ApiProperty } from "@nestjs/swagger";
 import { TokenResponseDto } from "./token-response.dto";
 import { UserPayloadResponseDto } from "./user-payload-response.dto";
 
-export class LoginResponseDto {
-    @ApiProperty()
-    success: boolean;
+export class OtpResponseDto {
+    @ApiProperty({
+        type: () => UserPayloadResponseDto,
+    })
+    users: UserPayloadResponseDto;
 
-    @ApiProperty()
-    status: 200;
-
-    @ApiProperty()
-    message: string;
+    @ApiProperty({
+        type: () => TokenResponseDto,
+    })
+    token: TokenResponseDto;
 }

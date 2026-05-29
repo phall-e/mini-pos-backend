@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserRequestDto } from './dto/create-user-request.dto';
 import { UpdateUserRequestDto } from './dto/update-user-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -88,6 +88,20 @@ export class UserService extends BasePaginationCrudService<UserEntity, UserRespo
 
   update(id: number, dto: UpdateUserRequestDto) {
     return `This action updates a #${id} user`;
+  }
+
+  public async updateOtp(userId: number, otp?: string): Promise<void> {
+    const entity = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+    if (!entity) throw new NotFoundException();
+    await this.userRepository.update({
+      id: userId,
+    }, {
+      otpCode: otp,
+    });
   }
 
   remove(id: number) {

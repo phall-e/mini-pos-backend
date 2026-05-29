@@ -33,6 +33,9 @@
       "@libs/*": [
         "src/libs/*"
       ],
+      "@telegram/*": [
+        "src/telegram/*"
+      ],
     },
     "incremental": true,
     "skipLibCheck": true,

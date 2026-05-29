@@ -38,6 +38,13 @@ export class UserMigration1764984877747 implements MigrationInterface {
                         isNullable: false,
                     },
                     {
+                        name: 'telegram_chat_id',
+                        type: 'varchar',
+                        length: '100',
+                        isUnique: true,
+                        isNullable: true,
+                    },
+                    {
                         name: 'otp_code',
                         type: 'varchar',
                         length: '6',
