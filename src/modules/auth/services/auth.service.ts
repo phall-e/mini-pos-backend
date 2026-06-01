@@ -37,6 +37,7 @@ export class AuthService {
 
             return {
                 success: true,
+                username: user.username,
                 status: 200,
                 message: 'OTP sent to Telegram',
             };

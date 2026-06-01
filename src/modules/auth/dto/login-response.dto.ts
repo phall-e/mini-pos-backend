@@ -8,6 +8,9 @@ export class LoginResponseDto {
     success: boolean;
 
     @ApiProperty()
+    username: string;
+
+    @ApiProperty()
     status: 200;
 
     @ApiProperty()
