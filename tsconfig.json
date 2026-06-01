@@ -28,7 +28,7 @@
         "src/modules/admin/*",
       ],
       "@auth/*": [
-        "src/modules/auth/",
+        "src/modules/auth/*",
       ],
       "@libs/*": [
         "src/libs/*"
