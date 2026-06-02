@@ -2,38 +2,31 @@ import {
   BadRequestException,
   ConflictException,
   InternalServerErrorException,
+  HttpException,
   NotFoundException,
   RequestTimeoutException,
   ServiceUnavailableException,
-  UnauthorizedException,
 } from '@nestjs/common';
 
-import {
-  QueryFailedError,
-  EntityNotFoundError,
-} from 'typeorm';
+import { QueryFailedError, EntityNotFoundError } from 'typeorm';
+
+type DatabaseError = {
+  code?: string;
+  detail?: string;
+  column?: string;
+  message?: string;
+};
+
+type InfrastructureError = {
+  name?: string;
+  code?: string;
+};
 
 export const handleError = (error: unknown): never => {
   /* ----------------------------------
    * 1. Native NestJS HTTP exceptions
    * ---------------------------------- */
-  if (error instanceof NotFoundException) {
-    throw error;
-  }
-
-  if (error instanceof BadRequestException) {
-    throw error;
-  }
-
-  if (error instanceof UnauthorizedException) {
-    throw error;
-  }
-
-  if (error instanceof RequestTimeoutException) {
-    throw error;
-  }
-
-  if (error instanceof InternalServerErrorException) {
+  if (error instanceof HttpException) {
     throw error;
   }
 
@@ -48,7 +41,7 @@ export const handleError = (error: unknown): never => {
 
   // SQL / DB errors
   if (error instanceof QueryFailedError) {
-    const dbError: any = error;
+    const dbError = error.driverError as DatabaseError;
 
     switch (dbError.code) {
       case '23505': // unique_violation
@@ -90,11 +83,13 @@ export const handleError = (error: unknown): never => {
    * 3. Connection / infrastructure errors
    * ---------------------------------- */
 
-  if ((error as any)?.name === 'TimeoutError') {
+  const infrastructureError = error as InfrastructureError;
+
+  if (infrastructureError.name === 'TimeoutError') {
     throw new RequestTimeoutException('Operation timed out');
   }
 
-  if ((error as any)?.code === 'ECONNREFUSED') {
+  if (infrastructureError.code === 'ECONNREFUSED') {
     throw new ServiceUnavailableException('Database connection refused');
   }
 

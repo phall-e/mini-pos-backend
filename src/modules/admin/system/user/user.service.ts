@@ -11,7 +11,10 @@ import { PasswordHash } from '@libs/utils/password-hash.util';
 import { handleError } from '@libs/utils/handle-error.util';
 
 @Injectable()
-export class UserService extends BasePaginationCrudService<UserEntity, UserResponseDto>{
+export class UserService extends BasePaginationCrudService<
+  UserEntity,
+  UserResponseDto
+> {
   protected SORTABLE_COLUMNS = ['id', 'username', 'isAdmin', 'isActive'];
   protected FILTER_COLUMNS = ['username', 'isAdmin', 'isActive'];
   protected SEARCHABLE_COLUMNS = ['username', 'isAdmin', 'isActive'];
@@ -19,16 +22,18 @@ export class UserService extends BasePaginationCrudService<UserEntity, UserRespo
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
-  ){
-    super()
+  ) {
+    super();
   }
 
   protected get repository(): Repository<UserEntity> {
     return this.userRepository;
-  } 
+  }
 
-  protected getMapperReponseEntityField(entities: UserEntity): Promise<UserResponseDto> {
-    return UserMapper.toDto(entities);
+  protected getMapperReponseEntityField(
+    entities: UserEntity,
+  ): Promise<UserResponseDto> {
+    return Promise.resolve(UserMapper.toDto(entities));
   }
 
   public async create(dto: CreateUserRequestDto): Promise<UserResponseDto> {
@@ -36,6 +41,7 @@ export class UserService extends BasePaginationCrudService<UserEntity, UserRespo
       let entity = UserMapper.toCreateEntity({
         ...dto,
         password: await PasswordHash.hash(dto.password),
+        roles: [],
       });
       entity = await this.userRepository.save(entity);
       if (dto.roles?.length) {
@@ -51,7 +57,9 @@ export class UserService extends BasePaginationCrudService<UserEntity, UserRespo
     }
   }
 
-  public async findAllForSelection(): Promise<{id: number; username: string;}[]> {
+  public async findAllForSelection(): Promise<
+    { id: number; username: string }[]
+  > {
     try {
       const entity = await this.userRepository.find({
         select: {
@@ -60,7 +68,7 @@ export class UserService extends BasePaginationCrudService<UserEntity, UserRespo
         },
         where: {
           isActive: true,
-        }
+        },
       });
       return entity;
     } catch (error) {
@@ -74,19 +82,17 @@ export class UserService extends BasePaginationCrudService<UserEntity, UserRespo
 
   public async findOneByUsername(username: string): Promise<UserEntity> {
     return await this.userRepository.findOne({
-      where: [
-        { username: username },
-        { email: username },
-      ],
+      where: [{ username: username }, { email: username }],
       relations: {
         roles: {
           permissions: true,
-        }
-      }
+        },
+      },
     });
   }
 
   update(id: number, dto: UpdateUserRequestDto) {
+    void dto;
     return `This action updates a #${id} user`;
   }
 
@@ -97,11 +103,14 @@ export class UserService extends BasePaginationCrudService<UserEntity, UserRespo
       },
     });
     if (!entity) throw new NotFoundException();
-    await this.userRepository.update({
-      id: userId,
-    }, {
-      otpCode: otp,
-    });
+    await this.userRepository.update(
+      {
+        id: userId,
+      },
+      {
+        otpCode: otp,
+      },
+    );
   }
 
   remove(id: number) {
