@@ -45,5 +45,5 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
   },
-  // "include": ["src/**/*"],
+  "include": ["src/**/*"],
 }
