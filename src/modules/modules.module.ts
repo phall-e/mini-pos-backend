@@ -3,6 +3,9 @@ import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [AdminModule, AuthModule]
+  imports: [
+    AuthModule,
+    AdminModule, 
+  ]
 })
 export class ModulesModule {}
