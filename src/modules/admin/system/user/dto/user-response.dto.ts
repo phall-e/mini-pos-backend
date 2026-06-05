@@ -1,31 +1,34 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { RoleResponseDto } from "../../role/dto/role-response.dto";
+import { ApiProperty } from '@nestjs/swagger';
+import { RoleResponseDto } from '../../role/dto/role-response.dto';
 
 export class UserResponseDto {
-    @ApiProperty()
-    id: number;
+  @ApiProperty()
+  id: number;
 
-    @ApiProperty()
-    username: string;
+  @ApiProperty()
+  username: string;
 
-    @ApiProperty()
-    email: string;
+  @ApiProperty()
+  email: string;
 
-    @ApiProperty()
-    isAdmin: boolean;
+  @ApiProperty()
+  telegramChatId: string;
 
-    @ApiProperty()
-    isActive: boolean;
+  @ApiProperty()
+  isAdmin: boolean;
 
-    @ApiProperty()
-    createdAt: Date;
+  @ApiProperty()
+  isActive: boolean;
 
-    @ApiProperty()
-    updatedAt: Date;
+  @ApiProperty()
+  createdAt: Date;
 
-    @ApiProperty()
-    deletedAt: Date;
+  @ApiProperty()
+  updatedAt: Date;
 
-    @ApiProperty()
-    roles: RoleResponseDto[];
+  @ApiProperty()
+  deletedAt: Date;
+
+  @ApiProperty()
+  roles: RoleResponseDto[];
 }

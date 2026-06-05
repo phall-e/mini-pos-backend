@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserRequestDto } from './dto/create-user-request.dto';
 import { UpdateUserRequestDto } from './dto/update-user-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -9,6 +14,11 @@ import { UserMapper } from './user.mapper';
 import { BasePaginationCrudService } from '@libs/common/services/base-pagination-crud.service';
 import { PasswordHash } from '@libs/utils/password-hash.util';
 import { handleError } from '@libs/utils/handle-error.util';
+import { TelegramService } from '@telegram/telegram.service';
+import { generateOpt } from '@libs/utils/otp-generator.util';
+import { ResetUserPasswordRequestDto } from './dto/reset-user-password-request.dto';
+import { VerifyResetUserPasswordRequestDto } from './dto/verify-reset-user-password-request.dto';
+import { UserActionResponseDto } from './dto/user-action-response.dto';
 
 @Injectable()
 export class UserService extends BasePaginationCrudService<
@@ -18,10 +28,12 @@ export class UserService extends BasePaginationCrudService<
   protected SORTABLE_COLUMNS = ['id', 'username', 'isAdmin', 'isActive'];
   protected FILTER_COLUMNS = ['username', 'isAdmin', 'isActive'];
   protected SEARCHABLE_COLUMNS = ['username', 'isAdmin', 'isActive'];
+  protected RELATIONSIP_FIELDS = ['roles'];
 
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    private readonly telegramService: TelegramService,
   ) {
     super();
   }
@@ -33,7 +45,7 @@ export class UserService extends BasePaginationCrudService<
   protected getMapperReponseEntityField(
     entities: UserEntity,
   ): Promise<UserResponseDto> {
-    return Promise.resolve(UserMapper.toDto(entities));
+    return UserMapper.toDtoWithRelationship(entities);
   }
 
   public async create(dto: CreateUserRequestDto): Promise<UserResponseDto> {
@@ -76,8 +88,24 @@ export class UserService extends BasePaginationCrudService<
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  public async findOne(id: number): Promise<UserResponseDto> {
+    try {
+      const entity = await this.userRepository.findOne({
+        where: {
+          id,
+        },
+        relations: {
+          roles: true,
+        },
+      });
+      if (!entity) {
+        throw new NotFoundException('User not found');
+      }
+
+      return UserMapper.toDtoWithRelationship(entity);
+    } catch (error) {
+      handleError(error);
+    }
   }
 
   public async findOneByUsername(username: string): Promise<UserEntity> {
@@ -91,9 +119,50 @@ export class UserService extends BasePaginationCrudService<
     });
   }
 
-  update(id: number, dto: UpdateUserRequestDto) {
-    void dto;
-    return `This action updates a #${id} user`;
+  public async update(
+    id: number,
+    dto: UpdateUserRequestDto,
+  ): Promise<UserResponseDto> {
+    try {
+      const entity = await this.userRepository.findOne({
+        where: {
+          id,
+        },
+        relations: {
+          roles: true,
+        },
+      });
+      if (!entity) {
+        throw new NotFoundException('User not found');
+      }
+
+      const oldRoleIds = ((await entity.roles) ?? []).map((role) => role.id);
+
+      const updatedEntity = UserMapper.toUpdateEntity(entity, dto);
+      await this.userRepository.save(updatedEntity);
+
+      if (dto.roles) {
+        const newRoleIds = dto.roles;
+        const roleIdsToAdd = newRoleIds.filter(
+          (roleId) => !oldRoleIds.includes(roleId),
+        );
+        const roleIdsToRemove = oldRoleIds.filter(
+          (roleId) => !newRoleIds.includes(roleId),
+        );
+
+        if (roleIdsToAdd.length || roleIdsToRemove.length) {
+          await this.userRepository
+            .createQueryBuilder()
+            .relation(UserEntity, 'roles')
+            .of(id)
+            .addAndRemove(roleIdsToAdd, roleIdsToRemove);
+        }
+      }
+
+      return this.findOne(id);
+    } catch (error) {
+      handleError(error);
+    }
   }
 
   public async updateOtp(userId: number, otp?: string): Promise<void> {
@@ -113,7 +182,99 @@ export class UserService extends BasePaginationCrudService<
     );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  public async remove(id: number): Promise<void> {
+    try {
+      const entity = await this.userRepository.findOne({
+        where: {
+          id,
+        },
+      });
+      if (!entity) {
+        throw new NotFoundException('User not found');
+      }
+
+      await this.userRepository.softRemove(entity);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  public async resetPassword(
+    id: number,
+    dto: ResetUserPasswordRequestDto,
+  ): Promise<UserActionResponseDto> {
+    try {
+      const entity = await this.userRepository.findOne({
+        where: {
+          id,
+        },
+      });
+      if (!entity) {
+        throw new NotFoundException('User not found');
+      }
+      if (!entity.telegramChatId) {
+        throw new BadRequestException('Telegram chat id is required');
+      }
+
+      const isMatched = await PasswordHash.verify(
+        dto.password,
+        entity.password,
+      );
+      if (!isMatched) {
+        throw new UnauthorizedException('Invalid password');
+      }
+
+      const otp = generateOpt();
+      await this.updateOtp(entity.id, otp);
+      await this.telegramService.sendMessage(
+        entity.telegramChatId,
+        `Your password reset OTP is ${otp}`,
+      );
+
+      return {
+        success: true,
+        status: 200,
+        message: 'OTP sent to Telegram',
+      };
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  public async verifyResetPassword(
+    id: number,
+    dto: VerifyResetUserPasswordRequestDto,
+  ): Promise<UserActionResponseDto> {
+    try {
+      const entity = await this.userRepository.findOne({
+        where: {
+          id,
+        },
+      });
+      if (!entity) {
+        throw new NotFoundException('User not found');
+      }
+      if (!entity.otpCode || entity.otpCode !== dto.otp) {
+        throw new UnauthorizedException('Invalid OTP code');
+      }
+
+      await this.userRepository.update(
+        {
+          id,
+        },
+        {
+          password: await PasswordHash.hash(dto.newPassword),
+          otpCode: null,
+        },
+      );
+
+      return {
+        success: true,
+        status: 200,
+        message: 'Password changed successfully',
+      };
+    } catch (error) {
+      handleError(error);
+    }
   }
 }

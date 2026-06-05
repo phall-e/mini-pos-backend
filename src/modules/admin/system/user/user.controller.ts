@@ -1,8 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserRequestDto } from './dto/create-user-request.dto';
 import { UpdateUserRequestDto } from './dto/update-user-request.dto';
-import { ApiBearerAuth, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserEntity } from './entities/user.entity';
 import { Paginate, type PaginateQuery } from 'nestjs-paginate';
@@ -10,6 +24,9 @@ import { SWAGGER_TOKEN_NAME } from 'src/swagger/config';
 import { Permissions } from '@modules/auth/decorators/permissions.decorator';
 import { ApiPaginatedResponse } from '@libs/common/paginations/api-paginated-response.decorator';
 import { PaginatedResponse } from '@libs/common/paginations/paginated-response.type';
+import { ResetUserPasswordRequestDto } from './dto/reset-user-password-request.dto';
+import { VerifyResetUserPasswordRequestDto } from './dto/verify-reset-user-password-request.dto';
+import { UserActionResponseDto } from './dto/user-action-response.dto';
 
 @ApiTags('User')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -21,15 +38,23 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() dto: CreateUserRequestDto) {
+  @Permissions('user-create')
+  @ApiResponse({ status: 201, type: UserResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  public create(@Body() dto: CreateUserRequestDto): Promise<UserResponseDto> {
     return this.userService.create(dto);
   }
 
   @Get()
   @Permissions('user-read')
   @ApiPaginatedResponse(UserResponseDto)
-  public findAll(@Paginate() queery: PaginateQuery): Promise<PaginatedResponse<UserEntity, UserResponseDto>> {
-    return this.userService.list(queery);
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  public findAll(
+    @Paginate() query: PaginateQuery,
+  ): Promise<PaginatedResponse<UserEntity, UserResponseDto>> {
+    return this.userService.list(query);
   }
 
   @Get('select-options')
@@ -51,23 +76,64 @@ export class UserController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized'})
-  public findAllForSelection(): Promise<{id: number; username: string}[]> {
+  // @Permissions('user-read')
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  // @ApiForbiddenResponse({ description: 'Forbidden' })
+  public findAllForSelection(): Promise<{ id: number; username: string }[]> {
     return this.userService.findAllForSelection();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  // @Permissions('user-read')
+  @ApiResponse({ status: 200, type: UserResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  // @ApiForbiddenResponse({ description: 'Forbidden' })
+  public findOne(@Param('id') id: string): Promise<UserResponseDto> {
     return this.userService.findOne(+id);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserRequestDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Permissions('user-edit')
+  @ApiResponse({ status: 200, type: UserResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  public update(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserRequestDto,
+  ): Promise<UserResponseDto> {
+    return this.userService.update(+id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Permissions('user-delete')
+  @ApiResponse({ status: 200 })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  public remove(@Param('id') id: string): Promise<void> {
     return this.userService.remove(+id);
+  }
+
+  @Post(':id/reset-password')
+  @Permissions('user-edit')
+  @ApiResponse({ status: 200, type: UserActionResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  public resetPassword(
+    @Param('id') id: string,
+    @Body() dto: ResetUserPasswordRequestDto,
+  ): Promise<UserActionResponseDto> {
+    return this.userService.resetPassword(+id, dto);
+  }
+
+  @Post(':id/reset-password/verify-otp')
+  @Permissions('user-edit')
+  @ApiResponse({ status: 200, type: UserActionResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  public verifyResetPassword(
+    @Param('id') id: string,
+    @Body() dto: VerifyResetUserPasswordRequestDto,
+  ): Promise<UserActionResponseDto> {
+    return this.userService.verifyResetPassword(+id, dto);
   }
 }

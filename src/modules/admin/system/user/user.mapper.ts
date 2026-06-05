@@ -12,6 +12,7 @@ export class UserMapper {
     dto.id = entity.id;
     dto.username = entity.username;
     dto.email = entity.email;
+    dto.telegramChatId = entity.telegramChatId;
     dto.isAdmin = entity.isAdmin;
     dto.isActive = entity.isActive;
     dto.createdAt = entity.createdAt;
@@ -27,10 +28,13 @@ export class UserMapper {
     const dto = new UserResponseDto();
     dto.id = entity.id;
     dto.username = entity.username;
+    dto.email = entity.email;
+    dto.telegramChatId = entity.telegramChatId;
     dto.isAdmin = entity.isAdmin;
     dto.isActive = entity.isActive;
     dto.createdAt = entity.createdAt;
     dto.updatedAt = entity.updatedAt;
+    dto.deletedAt = entity.deletedAt;
 
     const roles = (await entity.roles) ?? [];
     if (roles.length > 0) {
@@ -48,6 +52,7 @@ export class UserMapper {
     entity.username = dto.username;
     entity.email = dto.email;
     entity.password = dto.password;
+    entity.telegramChatId = dto.telegramChatId;
     entity.isAdmin = dto.isAdmin;
     entity.isActive = dto.isActive;
     if (dto.roles?.length) {
@@ -63,10 +68,11 @@ export class UserMapper {
     entity: UserEntity,
     dto: UpdateUserRequestDto,
   ): UserEntity {
-    entity.username = dto.username;
-    entity.email = dto.email;
-    entity.isAdmin = dto.isAdmin;
-    entity.isActive = dto.isActive;
+    entity.username = dto.username ?? entity.username;
+    entity.email = dto.email ?? entity.email;
+    entity.telegramChatId = dto.telegramChatId ?? entity.telegramChatId;
+    entity.isAdmin = dto.isAdmin ?? entity.isAdmin;
+    entity.isActive = dto.isActive ?? entity.isActive;
 
     return entity;
   }

@@ -24,6 +24,7 @@ import { PaginatedResponse } from '@libs/common/paginations/paginated-response.t
 import { RoleEntity } from './entities/role.entity';
 import { SWAGGER_TOKEN_NAME } from 'src/swagger/config';
 import { Permissions } from '@modules/auth/decorators/permissions.decorator';
+import { RoleSelectOptionResponseDto } from './dto/role-select-option-response.dto';
 
 @ApiTags('Role')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -52,6 +53,13 @@ export class RoleController {
     @Paginate() query: PaginateQuery,
   ): Promise<PaginatedResponse<RoleEntity, RoleResponseDto>> {
     return this.roleService.list(query);
+  }
+
+  @Get('select-options')
+  @ApiResponse({ status: 200, type: [RoleSelectOptionResponseDto] })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  public findAllForSelection(): Promise<RoleSelectOptionResponseDto[]> {
+    return this.roleService.findAllForSelection();
   }
 
   @Get(':id')

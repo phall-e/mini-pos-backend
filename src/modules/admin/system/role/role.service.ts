@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RoleMapper } from './role.mapper';
 import { handleError } from '@libs/utils/handle-error.util';
+import { RoleSelectOptionResponseDto } from './dto/role-select-option-response.dto';
 
 @Injectable()
 export class RoleService extends BasePaginationCrudService<
@@ -70,6 +71,24 @@ export class RoleService extends BasePaginationCrudService<
       }
 
       return RoleMapper.toDto(entity);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  public async findAllForSelection(): Promise<RoleSelectOptionResponseDto[]> {
+    try {
+      const entities = await this.roleRepository.find({
+        select: {
+          id: true,
+          name: true,
+        },
+        order: {
+          name: 'ASC',
+        },
+      });
+
+      return entities.map((entity) => RoleMapper.toSelectOptionDto(entity));
     } catch (error) {
       handleError(error);
     }

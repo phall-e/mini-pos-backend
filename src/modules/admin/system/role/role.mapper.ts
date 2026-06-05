@@ -1,6 +1,7 @@
 import { PermissionMapper } from '../permission/permission.mapper';
 import { CreateRoleRequestDto } from './dto/create-role-request.dto';
 import { RoleResponseDto } from './dto/role-response.dto';
+import { RoleSelectOptionResponseDto } from './dto/role-select-option-response.dto';
 import { UpdateRoleRequestDto } from './dto/update-role-request.dto';
 import { RoleEntity } from './entities/role.entity';
 
@@ -24,6 +25,17 @@ export class RoleMapper {
 
   public static toDtoList(entities: RoleEntity[]): Promise<RoleResponseDto[]> {
     return Promise.all(entities.map((item) => this.toDto(item)));
+  }
+
+  public static toSelectOptionDto(
+    entity: RoleEntity,
+  ): RoleSelectOptionResponseDto {
+    const dto = new RoleSelectOptionResponseDto();
+
+    dto.id = entity.id;
+    dto.name = entity.name;
+
+    return dto;
   }
 
   public static toCreateEntity(dto: CreateRoleRequestDto): RoleEntity {
