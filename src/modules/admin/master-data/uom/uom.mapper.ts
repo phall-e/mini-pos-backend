@@ -1,6 +1,7 @@
 import { UserMapper } from '@modules/admin/system/user/user.mapper';
 import { CreateUomRequestDto } from './dto/create-uom-request.dto';
 import { UomResponseDto } from './dto/uom-response.dto';
+import { UomSelectOptionResponseDto } from './dto/uom-select-option-response.dto';
 import { UpdateUomRequestDto } from './dto/update-uom-request.dto';
 import { UomEntity } from './entities/uom.entity';
 
@@ -18,8 +19,21 @@ export class UomMapper {
     dto.deletedAt = entity.deletedAt;
 
     if (entity.createdBy) {
-        dto.createdBy = await UserMapper.toDto(entity.createdBy);
+      dto.createdBy = await UserMapper.toDto(entity.createdBy);
     }
+
+    return dto;
+  }
+
+  public static toSelectOptionDto(
+    entity: UomEntity,
+  ): UomSelectOptionResponseDto {
+    const dto = new UomSelectOptionResponseDto();
+
+    dto.id = entity.id;
+    dto.code = entity.code;
+    dto.nameEn = entity.nameEn;
+    dto.nameKh = entity.nameKh;
 
     return dto;
   }

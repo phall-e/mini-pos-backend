@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UomMapper } from './uom.mapper';
 import { handleError } from '@libs/utils/handle-error.util';
+import { UomSelectOptionResponseDto } from './dto/uom-select-option-response.dto';
 
 @Injectable()
 export class UomService extends BasePaginationCrudService<
@@ -39,14 +40,14 @@ export class UomService extends BasePaginationCrudService<
   protected getMapperReponseEntityField(
     entity: UomEntity,
   ): Promise<UomResponseDto> {
-    return Promise.resolve(UomMapper.toDto(entity));
+    return UomMapper.toDto(entity);
   }
 
   public async create(dto: CreateUomRequestDto): Promise<UomResponseDto> {
     try {
       const entity = UomMapper.toCreateEntity(dto);
       const savedEntity = await this.uomRepository.save(entity);
-      return UomMapper.toDto(savedEntity);
+      return await UomMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
     }
@@ -62,7 +63,7 @@ export class UomService extends BasePaginationCrudService<
       if (!entity) {
         throw new NotFoundException('UOM not found');
       }
-      return UomMapper.toDto(entity);
+      return await UomMapper.toDto(entity);
     } catch (error) {
       handleError(error);
     }
@@ -84,7 +85,7 @@ export class UomService extends BasePaginationCrudService<
 
       const updatedEntity = UomMapper.toUpdateEntity(entity, dto);
       const savedEntity = await this.uomRepository.save(updatedEntity);
-      return UomMapper.toDto(savedEntity);
+      return await UomMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
     }
@@ -101,6 +102,26 @@ export class UomService extends BasePaginationCrudService<
         throw new NotFoundException('UOM not found');
       }
       await this.uomRepository.softRemove(entity);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  public async findAllForSelection(): Promise<UomSelectOptionResponseDto[]> {
+    try {
+      const entities = await this.uomRepository.find({
+        select: {
+          id: true,
+          code: true,
+          nameEn: true,
+          nameKh: true,
+        },
+        order: {
+          nameEn: 'ASC',
+        },
+      });
+
+      return entities.map((entity) => UomMapper.toSelectOptionDto(entity));
     } catch (error) {
       handleError(error);
     }

@@ -67,4 +67,21 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Product',
+    permissions: [
+      {
+        name: 'product-read',
+      },
+      {
+        name: 'product-create',
+      },
+      {
+        name: 'product-edit',
+      },
+      {
+        name: 'product-delete',
+      },
+    ],
+  },
 ];

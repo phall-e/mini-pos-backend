@@ -26,6 +26,7 @@ import { UomEntity } from './entities/uom.entity';
 import { CurrentUser } from '@modules/auth/decorators/current-user.decorator';
 import { UserEntity } from '@modules/admin/system/user/entities/user.entity';
 import { Permissions } from '@modules/auth/decorators/permissions.decorator';
+import { UomSelectOptionResponseDto } from './dto/uom-select-option-response.dto';
 
 @ApiTags('UOM')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -60,6 +61,15 @@ export class UomController {
     @Paginate() query: PaginateQuery,
   ): Promise<PaginatedResponse<UomEntity, UomResponseDto>> {
     return this.uomService.list(query);
+  }
+
+  @Get('select-options')
+  @Permissions('uom-read')
+  @ApiResponse({ status: 200, type: [UomSelectOptionResponseDto] })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  public findAllForSelection(): Promise<UomSelectOptionResponseDto[]> {
+    return this.uomService.findAllForSelection();
   }
 
   @Get(':id')
