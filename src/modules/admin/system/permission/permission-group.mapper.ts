@@ -1,22 +1,39 @@
-import { PermissionGroupResponseDto } from "./dto/permission-group-response.dto";
-import { PermissionGroupEntity } from "./entities/permission-group.entity";
-import { PermissionMapper } from "./permission.mapper";
+import { PermissionGroupResponseDto } from './dto/permission-group-response.dto';
+import { PermissionGroupSelectOptionResponseDto } from './dto/permission-group-select-option-response.dto';
+import { PermissionGroupEntity } from './entities/permission-group.entity';
+import { PermissionMapper } from './permission.mapper';
 
 export class PermissionGroupMapper {
-    public static async toDto(entity: PermissionGroupEntity): Promise<PermissionGroupResponseDto> {
-        const dto = new PermissionGroupResponseDto();
-        
-        dto.id = entity.id;
-        dto.name = entity.name;
-        dto.createdAt = entity.createdAt;
-        dto.updatedAt = entity.updatedAt;
-        dto.deletedAt = entity.deletedAt;
+  public static async toDto(
+    entity: PermissionGroupEntity,
+  ): Promise<PermissionGroupResponseDto> {
+    const dto = new PermissionGroupResponseDto();
 
-        if (entity.permissions && entity.permissions.length > 0) {
-            dto.permissions = await Promise.all((
-                entity.permissions.map((item) => PermissionMapper.toDto(item))
-            ));
-        }
-        return dto;
+    dto.id = entity.id;
+    dto.name = entity.name;
+    dto.createdAt = entity.createdAt;
+    dto.updatedAt = entity.updatedAt;
+    dto.deletedAt = entity.deletedAt;
+
+    if (entity.permissions && entity.permissions.length > 0) {
+      dto.permissions = await Promise.all(
+        entity.permissions.map((item) => PermissionMapper.toDto(item)),
+      );
     }
+    return dto;
+  }
+
+  public static toSelectOptionDto(
+    entity: PermissionGroupEntity,
+  ): PermissionGroupSelectOptionResponseDto {
+    const dto = new PermissionGroupSelectOptionResponseDto();
+
+    dto.id = entity.id;
+    dto.name = entity.name;
+    dto.permissions = (entity.permissions ?? []).map((permission) =>
+      PermissionMapper.toSelectOptionDto(permission),
+    );
+
+    return dto;
+  }
 }

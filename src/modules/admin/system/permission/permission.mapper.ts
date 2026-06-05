@@ -1,20 +1,34 @@
-import { PermissionResponseDto } from "./dto/permission-response.dto";
-import { PermissionEntity } from "./entities/permission.entity";
+import { PermissionResponseDto } from './dto/permission-response.dto';
+import { PermissionSelectOptionResponseDto } from './dto/permission-select-option-response.dto';
+import { PermissionEntity } from './entities/permission.entity';
 
 export class PermissionMapper {
-    public static async toDto(entity: PermissionEntity): Promise<PermissionResponseDto> {
-        const dto = new PermissionResponseDto();
-        
-        dto.id = entity.id;
-        dto.permissionGroupId = entity.permissionGroupId;
-        dto.name = entity.name;
-        dto.createdAt = entity.createdAt;
-        dto.updatedAt = entity.updatedAt;
-        dto.deletedAt = entity.deletedAt;
+  public static async toDto(
+    entity: PermissionEntity,
+  ): Promise<PermissionResponseDto> {
+    const dto = new PermissionResponseDto();
 
-        // if (entity.permssionGroup) {
-        //     dto.permissionGroup = await 
-        // }
-        return dto;
-    }
+    dto.id = entity.id;
+    dto.permissionGroupId = entity.permissionGroupId;
+    dto.name = entity.name;
+    dto.createdAt = entity.createdAt;
+    dto.updatedAt = entity.updatedAt;
+    dto.deletedAt = entity.deletedAt;
+
+    // if (entity.permssionGroup) {
+    //     dto.permissionGroup = await
+    // }
+    return dto;
+  }
+
+  public static toSelectOptionDto(
+    entity: PermissionEntity,
+  ): PermissionSelectOptionResponseDto {
+    const dto = new PermissionSelectOptionResponseDto();
+
+    dto.id = entity.id;
+    dto.name = entity.name;
+
+    return dto;
+  }
 }
