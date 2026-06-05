@@ -33,4 +33,21 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Role',
+    permissions: [
+      {
+        name: 'role-read',
+      },
+      {
+        name: 'role-create',
+      },
+      {
+        name: 'role-edit',
+      },
+      {
+        name: 'role-delete',
+      },
+    ],
+  },
 ];

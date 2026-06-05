@@ -1,26 +1,142 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoleRequestDto } from './dto/create-role-request.dto';
 import { UpdateRoleRequestDto } from './dto/update-role-request.dto';
+import { BasePaginationCrudService } from '@libs/common/services/base-pagination-crud.service';
+import { RoleEntity } from './entities/role.entity';
+import { RoleResponseDto } from './dto/role-response.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { RoleMapper } from './role.mapper';
+import { handleError } from '@libs/utils/handle-error.util';
 
 @Injectable()
-export class RoleService {
-  create(createRoleDto: CreateRoleRequestDto) {
-    return 'This action adds a new role';
+export class RoleService extends BasePaginationCrudService<
+  RoleEntity,
+  RoleResponseDto
+> {
+  protected SORTABLE_COLUMNS = ['id', 'name'];
+  protected FILTER_COLUMNS = ['name'];
+  protected SEARCHABLE_COLUMNS = ['name'];
+  protected RELATIONSIP_FIELDS = ['permissions'];
+
+  constructor(
+    @InjectRepository(RoleEntity)
+    private readonly roleRepository: Repository<RoleEntity>,
+  ) {
+    super();
   }
 
-  findAll() {
-    return `This action returns all role`;
+  protected get repository(): Repository<RoleEntity> {
+    return this.roleRepository;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} role`;
+  protected getMapperReponseEntityField(
+    entity: RoleEntity,
+  ): Promise<RoleResponseDto> {
+    return RoleMapper.toDto(entity);
   }
 
-  update(id: number, updateRoleDto: UpdateRoleRequestDto) {
-    return `This action updates a #${id} role`;
+  public async create(dto: CreateRoleRequestDto): Promise<RoleResponseDto> {
+    try {
+      const entity = RoleMapper.toCreateEntity(dto);
+      const savedEntity = await this.roleRepository.save(entity);
+
+      if (dto.permissions?.length) {
+        await this.roleRepository
+          .createQueryBuilder()
+          .relation(RoleEntity, 'permissions')
+          .of(savedEntity.id)
+          .add(dto.permissions);
+      }
+
+      return this.findOne(savedEntity.id);
+    } catch (error) {
+      handleError(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} role`;
+  public async findOne(id: number): Promise<RoleResponseDto> {
+    try {
+      const entity = await this.roleRepository.findOne({
+        where: {
+          id,
+        },
+        relations: {
+          permissions: true,
+        },
+      });
+      if (!entity) {
+        throw new NotFoundException('Role not found');
+      }
+
+      return RoleMapper.toDto(entity);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  public async update(
+    id: number,
+    dto: UpdateRoleRequestDto,
+  ): Promise<RoleResponseDto> {
+    try {
+      const entity = await this.roleRepository.findOne({
+        where: {
+          id,
+        },
+        relations: {
+          permissions: true,
+        },
+      });
+      if (!entity) {
+        throw new NotFoundException('Role not found');
+      }
+
+      const oldPermissionIds = ((await entity.permissions) ?? []).map(
+        (permission) => permission.id,
+      );
+
+      const updatedEntity = RoleMapper.toUpdateEntity(entity, dto);
+      await this.roleRepository.save(updatedEntity);
+
+      if (dto.permissions) {
+        const newPermissionIds = dto.permissions;
+        const permissionIdsToAdd = newPermissionIds.filter(
+          (permissionId) => !oldPermissionIds.includes(permissionId),
+        );
+        const permissionIdsToRemove = oldPermissionIds.filter(
+          (permissionId) => !newPermissionIds.includes(permissionId),
+        );
+
+        if (permissionIdsToAdd.length || permissionIdsToRemove.length) {
+          await this.roleRepository
+            .createQueryBuilder()
+            .relation(RoleEntity, 'permissions')
+            .of(id)
+            .addAndRemove(permissionIdsToAdd, permissionIdsToRemove);
+        }
+      }
+
+      return this.findOne(id);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  public async remove(id: number): Promise<void> {
+    try {
+      const entity = await this.roleRepository.findOne({
+        where: {
+          id,
+        },
+      });
+      if (!entity) {
+        throw new NotFoundException('Role not found');
+      }
+
+      await this.roleRepository.softRemove(entity);
+    } catch (error) {
+      handleError(error);
+    }
   }
 }
