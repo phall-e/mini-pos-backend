@@ -37,7 +37,7 @@ const options: DataSourceOptions & SeederOptions = {
   database: process.env.TYPEORM_DATABASE,
   entities: [__dirname + '/../modules/**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/migrations/admin/*{.ts,.js}'],
-  seeds: [__dirname + '/seeds/main.seed{.ts,.js}'],
+  seeds: ['src/database/seeds/main.seed.ts'],
   logging: true,
   synchronize: false,
   ssl: getSslConfig(),
