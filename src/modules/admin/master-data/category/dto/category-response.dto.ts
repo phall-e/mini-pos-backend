@@ -1,3 +1,4 @@
+import { UserResponseDto } from '@modules/admin/system/user/dto/user-response.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CategoryResponseDto {
@@ -9,6 +10,9 @@ export class CategoryResponseDto {
 
   @ApiProperty()
   createdById: number;
+
+  @ApiProperty()
+  createdBy: UserResponseDto;
 
   @ApiProperty()
   nameEn: string;

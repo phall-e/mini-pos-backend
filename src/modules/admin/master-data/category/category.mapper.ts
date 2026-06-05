@@ -1,3 +1,4 @@
+import { UserMapper } from '@modules/admin/system/user/user.mapper';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { CategorySelectOptionResponseDto } from './dto/category-select-option-response.dto';
 import { CreateCategoryRequestDto } from './dto/create-category-request.dto';
@@ -5,7 +6,7 @@ import { UpdateCategoryRequestDto } from './dto/update-category-request.dto';
 import { CategoryEntity } from './entities/category.entity';
 
 export class CategoryMapper {
-  public static toDto(entity: CategoryEntity): CategoryResponseDto {
+  public static async toDto(entity: CategoryEntity): Promise<CategoryResponseDto> {
     const dto = new CategoryResponseDto();
 
     dto.id = entity.id;
@@ -16,6 +17,10 @@ export class CategoryMapper {
     dto.createdAt = entity.createdAt;
     dto.updatedAt = entity.updatedAt;
     dto.deletedAt = entity.deletedAt;
+
+    if (entity.createdBy) {
+      dto.createdBy = await UserMapper.toDto(entity.createdBy);
+    }
 
     return dto;
   }
