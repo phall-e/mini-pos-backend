@@ -10,6 +10,8 @@ import { UserEntity } from '@modules/admin/system/user/entities/user.entity';
 import { UomEntity } from '@modules/admin/master-data/uom/entities/uom.entity';
 import { uoms } from './uom.seed';
 import { PermissionEntity } from '@modules/admin/system/permission/entities/permission.entity';
+import { CategoryEntity } from '@modules/admin/master-data/category/entities/category.entity';
+import { categories } from './category.seed';
 
 export default class MainSeeder implements Seeder {
   public async run(database: DataSource): Promise<void> {
@@ -57,5 +59,6 @@ export default class MainSeeder implements Seeder {
       .execute();
 
     await database.manager.save(UomEntity, uoms);
+    await database.manager.save(CategoryEntity, categories);
   }
 }

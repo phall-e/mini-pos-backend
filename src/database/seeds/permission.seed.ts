@@ -50,4 +50,21 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Category',
+    permissions: [
+      {
+        name: 'category-read',
+      },
+      {
+        name: 'category-create',
+      },
+      {
+        name: 'category-edit',
+      },
+      {
+        name: 'category-delete',
+      },
+    ],
+  },
 ];
