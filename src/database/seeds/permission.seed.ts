@@ -152,4 +152,21 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Stock Adjustment',
+    permissions: [
+      {
+        name: 'stock-adjustment-read',
+      },
+      {
+        name: 'stock-adjustment-create',
+      },
+      {
+        name: 'stock-adjustment-edit',
+      },
+      {
+        name: 'stock-adjustment-delete',
+      },
+    ],
+  },
 ];
