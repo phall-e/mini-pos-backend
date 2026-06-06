@@ -14,6 +14,8 @@ import { CategoryEntity } from '@modules/admin/master-data/category/entities/cat
 import { categories } from './category.seed';
 import { ProductEntity } from '@modules/admin/master-data/product/entities/product.entity';
 import { products } from './product.seed';
+import { VendorEntity } from '@modules/admin/master-data/vendor/entities/vendor.entity';
+import { vendors } from './vendor.seed';
 
 export default class MainSeeder implements Seeder {
   public async run(database: DataSource): Promise<void> {
@@ -63,5 +65,6 @@ export default class MainSeeder implements Seeder {
     await database.manager.save(UomEntity, uoms);
     await database.manager.save(CategoryEntity, categories);
     await database.manager.save(ProductEntity, products);
+    await database.manager.save(VendorEntity, vendors);
   }
 }

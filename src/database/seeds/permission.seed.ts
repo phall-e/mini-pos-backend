@@ -84,4 +84,21 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Vendor',
+    permissions: [
+      {
+        name: 'vendor-read',
+      },
+      {
+        name: 'vendor-create',
+      },
+      {
+        name: 'vendor-edit',
+      },
+      {
+        name: 'vendor-delete',
+      },
+    ],
+  },
 ];
