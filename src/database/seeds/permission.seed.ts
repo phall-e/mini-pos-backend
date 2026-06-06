@@ -101,4 +101,21 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Customer',
+    permissions: [
+      {
+        name: 'customer-read',
+      },
+      {
+        name: 'customer-create',
+      },
+      {
+        name: 'customer-edit',
+      },
+      {
+        name: 'customer-delete',
+      },
+    ],
+  },
 ];

@@ -1,0 +1,43 @@
+import { CustomerGender } from '@modules/admin/master-data/customer/entities/customer.entity';
+
+export const customers = [
+  {
+    code: 'CUS-001',
+    nameEn: 'Sok Dara',
+    nameKh: 'Sok Dara',
+    gender: CustomerGender.MALE,
+    dob: '1994-03-12',
+    phoneNumber: '+85512345670',
+    address: 'Phnom Penh, Cambodia',
+    note: null,
+    profile: null,
+    attachments: null,
+    createdById: 1,
+  },
+  {
+    code: 'CUS-002',
+    nameEn: 'Chan Sreyneang',
+    nameKh: 'Chan Sreyneang',
+    gender: CustomerGender.FEMALE,
+    dob: '1998-07-24',
+    phoneNumber: '+85598765430',
+    address: 'Siem Reap, Cambodia',
+    note: null,
+    profile: null,
+    attachments: null,
+    createdById: 1,
+  },
+  {
+    code: 'CUS-003',
+    nameEn: 'Kim Vicheka',
+    nameKh: 'Kim Vicheka',
+    gender: CustomerGender.MALE,
+    dob: null,
+    phoneNumber: '+85511223340',
+    address: 'Battambang, Cambodia',
+    note: null,
+    profile: null,
+    attachments: null,
+    createdById: 1,
+  },
+];
