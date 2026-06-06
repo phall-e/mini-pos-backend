@@ -135,4 +135,21 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Stock',
+    permissions: [
+      {
+        name: 'stock-read',
+      },
+      {
+        name: 'stock-create',
+      },
+      {
+        name: 'stock-edit',
+      },
+      {
+        name: 'stock-delete',
+      },
+    ],
+  },
 ];
