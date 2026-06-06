@@ -18,6 +18,9 @@ import { VendorEntity } from '@modules/admin/master-data/vendor/entities/vendor.
 import { vendors } from './vendor.seed';
 import { CustomerEntity } from '@modules/admin/master-data/customer/entities/customer.entity';
 import { customers } from './customer.seed';
+import { PurchaseOrderEntity } from '@modules/admin/purchasing/purchase-order/entities/purchase-order.entity';
+import { PurchaseOrderItemEntity } from '@modules/admin/purchasing/purchase-order/entities/purchase-order-item.entity';
+import { purchaseOrderItems, purchaseOrders } from './purchase-order.seed';
 
 export default class MainSeeder implements Seeder {
   public async run(database: DataSource): Promise<void> {
@@ -69,5 +72,7 @@ export default class MainSeeder implements Seeder {
     await database.manager.save(ProductEntity, products);
     await database.manager.save(VendorEntity, vendors);
     await database.manager.save(CustomerEntity, customers);
+    await database.manager.save(PurchaseOrderEntity, purchaseOrders);
+    await database.manager.save(PurchaseOrderItemEntity, purchaseOrderItems);
   }
 }

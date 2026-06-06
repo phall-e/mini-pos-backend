@@ -118,4 +118,21 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Purchase Order',
+    permissions: [
+      {
+        name: 'purchase-order-read',
+      },
+      {
+        name: 'purchase-order-create',
+      },
+      {
+        name: 'purchase-order-edit',
+      },
+      {
+        name: 'purchase-order-delete',
+      },
+    ],
+  },
 ];
