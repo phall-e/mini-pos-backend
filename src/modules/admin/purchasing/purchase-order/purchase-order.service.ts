@@ -11,9 +11,13 @@ import { CreatePurchaseOrderRequestDto } from './dto/create-purchase-order-reque
 import { CreatePurchaseOrderItemRequestDto } from './dto/create-purchase-order-item-request.dto';
 import { PurchaseOrderCodeResponseDto } from './dto/purchase-order-code-response.dto';
 import { PurchaseOrderResponseDto } from './dto/purchase-order-response.dto';
+import { PurchaseOrderSelectOptionResponseDto } from './dto/purchase-order-select-option-response.dto';
 import { UpdatePurchaseOrderRequestDto } from './dto/update-purchase-order-request.dto';
 import { UpdatePurchaseOrderItemRequestDto } from './dto/update-purchase-order-item-request.dto';
-import { PurchaseOrderEntity } from './entities/purchase-order.entity';
+import {
+  PurchaseOrderEntity,
+  PurchaseOrderStatus,
+} from './entities/purchase-order.entity';
 import { PurchaseOrderItemEntity } from './entities/purchase-order-item.entity';
 import { PurchaseOrderItemMapper } from './purchase-order-item-mapper';
 import { PurchaseOrderMapper } from './purchase-order-mapper';
@@ -108,6 +112,31 @@ export class PurchaseOrderService extends BasePaginationCrudService<
       }
 
       return PurchaseOrderMapper.toDto(entity);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  public async findCompletedForSelection(): Promise<
+    PurchaseOrderSelectOptionResponseDto[]
+  > {
+    try {
+      const entities = await this.purchaseOrderRepository.find({
+        where: {
+          status: PurchaseOrderStatus.COMPLETED,
+        },
+        relations: {
+          vendor: true,
+        },
+        order: {
+          orderDate: 'DESC',
+          code: 'DESC',
+        },
+      });
+
+      return entities.map((entity) =>
+        PurchaseOrderMapper.toSelectOptionDto(entity),
+      );
     } catch (error) {
       handleError(error);
     }

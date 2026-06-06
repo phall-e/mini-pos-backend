@@ -2,6 +2,7 @@ import { VendorMapper } from '@modules/admin/master-data/vendor/vendor.mapper';
 import { UserMapper } from '@modules/admin/system/user/user.mapper';
 import { CreatePurchaseOrderRequestDto } from './dto/create-purchase-order-request.dto';
 import { PurchaseOrderResponseDto } from './dto/purchase-order-response.dto';
+import { PurchaseOrderSelectOptionResponseDto } from './dto/purchase-order-select-option-response.dto';
 import { UpdatePurchaseOrderRequestDto } from './dto/update-purchase-order-request.dto';
 import { PurchaseOrderEntity } from './entities/purchase-order.entity';
 import { PurchaseOrderItemMapper } from './purchase-order-item-mapper';
@@ -60,6 +61,24 @@ export class PurchaseOrderMapper {
     entity.attachments = dto.attachments;
 
     return entity;
+  }
+
+  public static toSelectOptionDto(
+    entity: PurchaseOrderEntity,
+  ): PurchaseOrderSelectOptionResponseDto {
+    const dto = new PurchaseOrderSelectOptionResponseDto();
+
+    dto.id = entity.id;
+    dto.code = entity.code;
+    dto.orderDate = entity.orderDate;
+    dto.vendorId = entity.vendorId;
+    dto.status = entity.status;
+
+    if (entity.vendor) {
+      dto.vendor = VendorMapper.toDto(entity.vendor);
+    }
+
+    return dto;
   }
 
   public static toUpdateEntity(

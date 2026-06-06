@@ -25,6 +25,7 @@ import { PurchaseOrderService } from './purchase-order.service';
 import { PurchaseOrderCodeResponseDto } from './dto/purchase-order-code-response.dto';
 import { CreatePurchaseOrderRequestDto } from './dto/create-purchase-order-request.dto';
 import { PurchaseOrderResponseDto } from './dto/purchase-order-response.dto';
+import { PurchaseOrderSelectOptionResponseDto } from './dto/purchase-order-select-option-response.dto';
 import { UpdatePurchaseOrderRequestDto } from './dto/update-purchase-order-request.dto';
 import { PurchaseOrderEntity } from './entities/purchase-order.entity';
 
@@ -70,6 +71,17 @@ export class PurchaseOrderController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   public generateCode(): Promise<PurchaseOrderCodeResponseDto> {
     return this.purchaseOrderService.generateCode();
+  }
+
+  @Get('select-options/completed')
+  @Permissions('purchase-order-read')
+  @ApiResponse({ status: 200, type: [PurchaseOrderSelectOptionResponseDto] })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  public findCompletedForSelection(): Promise<
+    PurchaseOrderSelectOptionResponseDto[]
+  > {
+    return this.purchaseOrderService.findCompletedForSelection();
   }
 
   @Get(':id')
