@@ -186,4 +186,21 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Sale',
+    permissions: [
+      {
+        name: 'sale-read',
+      },
+      {
+        name: 'sale-create',
+      },
+      {
+        name: 'sale-edit',
+      },
+      {
+        name: 'sale-delete',
+      },
+    ],
+  },
 ];
