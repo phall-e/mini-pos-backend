@@ -203,4 +203,12 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Dashboard',
+    permissions: [
+      {
+        name: 'dashboard-read',
+      },
+    ],
+  },
 ];
