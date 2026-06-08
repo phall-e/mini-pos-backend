@@ -1,4 +1,5 @@
 import { CustomerMapper } from '@modules/admin/master-data/customer/customer.mapper';
+import { PaymentSettingMapper } from '@modules/admin/system/payment-setting/payment-setting.mapper';
 import { UserMapper } from '@modules/admin/system/user/user.mapper';
 import { CreateSaleRequestDto } from './dto/create-sale-request.dto';
 import { SaleResponseDto } from './dto/sale-response.dto';
@@ -14,6 +15,7 @@ export class SaleMapper {
     dto.code = entity.code;
     dto.saleDate = entity.saleDate;
     dto.customerId = entity.customerId;
+    dto.paymentTypeId = entity.paymentTypeId;
     dto.note = entity.note;
     dto.discount = Number(entity.discount ?? 0);
     dto.createdById = entity.createdById;
@@ -39,6 +41,10 @@ export class SaleMapper {
       dto.customer = await CustomerMapper.toDto(entity.customer);
     }
 
+    if (entity.paymentType) {
+      dto.paymentType = PaymentSettingMapper.toDto(entity.paymentType);
+    }
+
     if (entity.createdBy) {
       dto.createdBy = UserMapper.toDto(entity.createdBy);
     }
@@ -52,6 +58,7 @@ export class SaleMapper {
     entity.code = dto.code;
     entity.saleDate = new Date(dto.saleDate);
     entity.customerId = dto.customerId;
+    entity.paymentTypeId = dto.paymentTypeId;
     entity.note = dto.note;
     entity.discount = dto.discount ?? 0;
     entity.createdById = dto.createdById;
@@ -68,6 +75,10 @@ export class SaleMapper {
     entity.code = dto.code ?? entity.code;
     entity.saleDate = dto.saleDate ? new Date(dto.saleDate) : entity.saleDate;
     entity.customerId = dto.customerId ?? entity.customerId;
+    entity.paymentTypeId =
+      dto.paymentTypeId !== undefined
+        ? dto.paymentTypeId
+        : entity.paymentTypeId;
     entity.note = dto.note !== undefined ? dto.note : entity.note;
     entity.discount = dto.discount ?? entity.discount;
     entity.createdById = dto.createdById ?? entity.createdById;

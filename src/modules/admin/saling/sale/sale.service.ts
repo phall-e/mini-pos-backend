@@ -29,14 +29,23 @@ export class SaleService extends BasePaginationCrudService<
     'code',
     'saleDate',
     'customerId',
+    'paymentTypeId',
     'createdById',
     'status',
   ];
-  protected FILTER_COLUMNS = ['code', 'customerId', 'createdById', 'status'];
+  protected FILTER_COLUMNS = [
+    'code',
+    'customerId',
+    'paymentTypeId',
+    'createdById',
+    'status',
+  ];
   protected SEARCHABLE_COLUMNS = ['code', 'note'];
   protected RELATIONSIP_FIELDS = [
     'customer',
     'customer.createdBy',
+    'paymentType',
+    'paymentType.createdBy',
     'items',
     'items.product',
     'createdBy',
@@ -280,6 +289,9 @@ export class SaleService extends BasePaginationCrudService<
       },
       relations: {
         customer: {
+          createdBy: true,
+        },
+        paymentType: {
           createdBy: true,
         },
         items: {

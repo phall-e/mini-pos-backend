@@ -1,5 +1,6 @@
 import { Attachment } from '@libs/common/dtos/attachment';
 import { CustomerResponseDto } from '@modules/admin/master-data/customer/dto/customer-response.dto';
+import { PaymentSettingResponseDto } from '@modules/admin/system/payment-setting/dto/payment-setting-response.dto';
 import { UserResponseDto } from '@modules/admin/system/user/dto/user-response.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { SaleStatus } from '../entities/sale.entity';
@@ -20,6 +21,16 @@ export class SaleResponseDto {
 
   @ApiProperty()
   customer: CustomerResponseDto;
+
+  @ApiProperty({ required: false, nullable: true })
+  paymentTypeId: number | null;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    type: () => PaymentSettingResponseDto,
+  })
+  paymentType: PaymentSettingResponseDto | null;
 
   @ApiProperty({ required: false, nullable: true })
   note: string | null;

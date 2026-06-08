@@ -42,6 +42,12 @@ export class CreateSaleRequestDto {
   @Type(() => Number)
   customerId: number;
 
+  @ApiProperty({ required: false, nullable: true, example: 1 })
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  paymentTypeId?: number | null;
+
   @ApiProperty({ required: false, nullable: true })
   @IsOptional()
   @IsString()

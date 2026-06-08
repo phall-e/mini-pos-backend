@@ -1,6 +1,7 @@
 import { BaseEntity } from '@database/entities/base.entity';
 import { Attachment } from '@libs/common/dtos/attachment';
 import { CustomerEntity } from '@modules/admin/master-data/customer/entities/customer.entity';
+import { PaymentSettingEntity } from '@modules/admin/system/payment-setting/entities/payment-setting.entity';
 import { UserEntity } from '@modules/admin/system/user/entities/user.entity';
 import {
   Column,
@@ -59,6 +60,22 @@ export class SaleEntity extends BaseEntity {
     name: 'customer_id',
   })
   customer: CustomerEntity;
+
+  @Column({
+    name: 'payment_type_id',
+    type: 'integer',
+    nullable: true,
+  })
+  paymentTypeId: number | null;
+
+  @ManyToOne(() => PaymentSettingEntity, {
+    nullable: true,
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({
+    name: 'payment_type_id',
+  })
+  paymentType: PaymentSettingEntity | null;
 
   @Column({
     name: 'note',
