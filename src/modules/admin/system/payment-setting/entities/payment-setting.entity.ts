@@ -43,83 +43,83 @@ export class PaymentSettingEntity extends BaseEntity {
     name: 'bank_account',
     type: 'varchar',
     length: '150',
-    nullable: false,
+    nullable: true,
   })
-  bankAccount: string;
+  bankAccount: string | null;
 
   @Column({
     name: 'merchant_name',
     type: 'varchar',
     length: '150',
-    nullable: false,
+    nullable: true,
   })
-  merchantName: string;
+  merchantName: string | null;
 
   @Column({
     name: 'merchant_city',
     type: 'varchar',
     length: '150',
-    nullable: false,
+    nullable: true,
   })
-  merchantCity: string;
+  merchantCity: string | null;
 
   @Column({
     name: 'amount',
     type: 'decimal',
     precision: 14,
     scale: 2,
-    nullable: false,
+    nullable: true,
   })
-  amount: number;
+  amount: number | null;
 
   @Column({
     name: 'currency',
     type: 'enum',
     enum: PaymentSettingCurrency,
-    nullable: false,
+    nullable: true,
   })
-  currency: PaymentSettingCurrency;
+  currency: PaymentSettingCurrency | null;
 
   @Column({
     name: 'store_label',
     type: 'varchar',
     length: '150',
-    nullable: false,
+    nullable: true,
   })
-  storeLabel: string;
+  storeLabel: string | null;
 
   @Column({
     name: 'phone_number',
     type: 'varchar',
     length: '50',
-    nullable: false,
+    nullable: true,
   })
-  phoneNumber: string;
+  phoneNumber: string | null;
 
   @Column({
     name: 'bill_number',
     type: 'varchar',
     length: '150',
-    nullable: false,
+    nullable: true,
   })
-  billNumber: string;
+  billNumber: string | null;
 
   @Column({
     name: 'terminal_label',
     type: 'varchar',
     length: '150',
-    nullable: false,
+    nullable: true,
   })
-  terminalLabel: string;
+  terminalLabel: string | null;
 
   @Column({
     name: 'merchant_category_code',
     type: 'varchar',
     length: '50',
-    nullable: false,
+    nullable: true,
     default: '5999',
   })
-  merchantCategoryCode: string;
+  merchantCategoryCode: string | null;
 
   @Column({
     name: 'is_active',
@@ -128,6 +128,14 @@ export class PaymentSettingEntity extends BaseEntity {
     default: true,
   })
   isActive: boolean;
+
+  @Column({
+    name: 'is_cashed',
+    type: 'boolean',
+    nullable: false,
+    default: false,
+  })
+  isCashed: boolean;
 
   @Column({
     name: 'created_by_id',

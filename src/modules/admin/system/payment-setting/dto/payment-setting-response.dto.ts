@@ -13,38 +13,45 @@ export class PaymentSettingResponseDto {
   @ApiProperty({ required: false, nullable: true, type: () => Attachment })
   logo: Attachment | null;
 
-  @ApiProperty()
-  bankAccount: string;
+  @ApiProperty({ required: false, nullable: true })
+  bankAccount: string | null;
 
-  @ApiProperty()
-  merchantName: string;
+  @ApiProperty({ required: false, nullable: true })
+  merchantName: string | null;
 
-  @ApiProperty()
-  merchantCity: string;
+  @ApiProperty({ required: false, nullable: true })
+  merchantCity: string | null;
 
-  @ApiProperty()
-  amount: number;
+  @ApiProperty({ required: false, nullable: true })
+  amount: number | null;
 
-  @ApiProperty({ enum: PaymentSettingCurrency })
-  currency: PaymentSettingCurrency;
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    enum: PaymentSettingCurrency,
+  })
+  currency: PaymentSettingCurrency | null;
 
-  @ApiProperty()
-  storeLabel: string;
+  @ApiProperty({ required: false, nullable: true })
+  storeLabel: string | null;
 
-  @ApiProperty()
-  phoneNumber: string;
+  @ApiProperty({ required: false, nullable: true })
+  phoneNumber: string | null;
 
-  @ApiProperty()
-  billNumber: string;
+  @ApiProperty({ required: false, nullable: true })
+  billNumber: string | null;
 
-  @ApiProperty()
-  terminalLabel: string;
+  @ApiProperty({ required: false, nullable: true })
+  terminalLabel: string | null;
 
-  @ApiProperty()
-  merchantCategoryCode: string;
+  @ApiProperty({ required: false, nullable: true })
+  merchantCategoryCode: string | null;
 
   @ApiProperty()
   isActive: boolean;
+
+  @ApiProperty()
+  isCashed: boolean;
 
   @ApiProperty()
   createdById: number;

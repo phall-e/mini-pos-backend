@@ -10,4 +10,7 @@ export class PaymentSettingSelectOptionResponseDto {
 
   @ApiProperty({ required: false, nullable: true, type: () => Attachment })
   logo: Attachment | null;
+
+  @ApiProperty()
+  isCashed: boolean;
 }

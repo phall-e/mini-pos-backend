@@ -11,6 +11,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -30,6 +31,7 @@ import { UpdatePaymentSettingRequestDto } from './dto/update-payment-setting-req
 import { PaymentSettingEntity } from './entities/payment-setting.entity';
 import { PaymentSettingService } from './payment-setting.service';
 import { SkipAuth } from '@modules/auth/decorators/skip-auth.decorator';
+import { GenerateQrCodeRequestDto } from './dto/generate-qr-code-request.dto';
 
 @ApiTags('Payment Setting')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -68,16 +70,25 @@ export class PaymentSettingController {
     return this.paymentSettingService.list(query);
   }
 
-  @Get('generate-khr')
-  // @Permissions('sale-create')
-  @SkipAuth()
-  @ApiResponse({ status: 200, type: GenerateQrCodeResponseDto })
+  @Get('generate-khqr')
+  @Permissions('sale-create')
+  @ApiResponse({ status: 200, type: Object })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiNotFoundResponse({ description: 'Not found' })
-  public generateKhrString(): Promise<GenerateQrCodeResponseDto> {
-    return this.paymentSettingService.generateQrCode();
+  public generateKhrString(@Query() dto: GenerateQrCodeRequestDto): Promise<any> {
+    return this.paymentSettingService.generateQrCode(dto);
   }
+
+  @Get('verify-khqr/:khqr/:saleNumber')
+  @Permissions('sale-create')
+  @ApiResponse({ status: 200, type: Boolean })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  public verifyKHQR(@Param('khqr') khqr: string, @Param('saleNumber') saleNumber: string): Promise<boolean> {
+    return this.paymentSettingService.verifyKHQR(khqr, saleNumber);
+  }
+
 
   @Get('select-options')
   @Permissions('sale-create')

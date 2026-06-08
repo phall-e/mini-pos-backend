@@ -10,6 +10,8 @@ import { PaymentSettingResponseDto } from './dto/payment-setting-response.dto';
 import { UpdatePaymentSettingRequestDto } from './dto/update-payment-setting-request.dto';
 import { PaymentSettingEntity } from './entities/payment-setting.entity';
 import { PaymentSettingMapper } from './payment-setting.mapper';
+import { GenerateQrCodeRequestDto } from './dto/generate-qr-code-request.dto';
+import { TelegramService } from '@telegram/telegram.service';
 
 const { BakongKHQR, khqrData, MerchantInfo } = require('bakong-khqr');
 
@@ -32,9 +34,15 @@ export class PaymentSettingService extends BasePaginationCrudService<
     'terminalLabel',
     'merchantCategoryCode',
     'isActive',
+    'isCashed',
     'createdById',
   ];
-  protected FILTER_COLUMNS = ['currency', 'isActive', 'createdById'];
+  protected FILTER_COLUMNS = [
+    'currency',
+    'isActive',
+    'isCashed',
+    'createdById',
+  ];
   protected SEARCHABLE_COLUMNS = [
     'name',
     'bankAccount',
@@ -51,6 +59,7 @@ export class PaymentSettingService extends BasePaginationCrudService<
   constructor(
     @InjectRepository(PaymentSettingEntity)
     private readonly paymentSettingRepository: Repository<PaymentSettingEntity>,
+    private readonly telegramService: TelegramService,
   ) {
     super();
   }
@@ -86,6 +95,7 @@ export class PaymentSettingService extends BasePaginationCrudService<
           id: true,
           name: true,
           logo: true,
+          isCashed: true,
         },
         order: {
           name: 'ASC',
@@ -161,20 +171,25 @@ export class PaymentSettingService extends BasePaginationCrudService<
   }
 
   // Generate QR Code string
-  public async generateQrCode(): Promise<GenerateQrCodeResponseDto> {
+  public async generateQrCode(dto: GenerateQrCodeRequestDto): Promise<any> {
     try {
       const entity = await this.paymentSettingRepository.findOne({
         where: {
+          id: dto.id,
           isActive: true,
         },
       });
 
       if (!entity) throw new NotFoundException();
 
+      if (entity.isCashed) {
+        return await PaymentSettingMapper.toDto(entity);
+      }
+
       const optionalData = {
         currency: khqrData.currency.usd,
-        amount: 1.25,
-        billNumber: entity.billNumber,
+        amount: dto.amount,
+        billNumber: dto.billNumber,
         mobileNumber: entity.phoneNumber,
         storeLabel: entity.storeLabel,
         terminalLabel: entity.terminalLabel,
@@ -193,7 +208,24 @@ export class PaymentSettingService extends BasePaginationCrudService<
       const response: GenerateQrCodeResponseDto =
         khqr.generateMerchant(merchantInfo);
       console.log(response);
-      return response;
+      return {
+        ...response,
+        isCashed: entity.isCashed,
+      };
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  // Verify KHQR
+  public async verifyKHQR (khqr: string, saleNumber: string): Promise<boolean> {
+    try {
+      const KHQRString = khqr;
+      const isKHQR = BakongKHQR.verify(KHQRString).isValid;
+      if (!isKHQR) {
+        await this.telegramService.sendMessage('1371216284', `Testing Invoice number ${saleNumber}`)
+      }
+      return isKHQR;
     } catch (error) {
       handleError(error);
     }
