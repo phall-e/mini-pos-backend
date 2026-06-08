@@ -18,6 +18,7 @@ import { SaleItemEntity } from './entities/sale-item.entity';
 import { SaleEntity } from './entities/sale.entity';
 import { SaleItemMapper } from './sale-item.mapper';
 import { SaleMapper } from './sale.mapper';
+import { TelegramService } from '@telegram/telegram.service';
 
 @Injectable()
 export class SaleService extends BasePaginationCrudService<
@@ -57,6 +58,7 @@ export class SaleService extends BasePaginationCrudService<
     @InjectRepository(SaleEntity)
     private readonly saleRepository: Repository<SaleEntity>,
     private readonly dataSource: DataSource,
+    private readonly telegramService: TelegramService,
   ) {
     super();
   }
@@ -89,6 +91,54 @@ export class SaleService extends BasePaginationCrudService<
         return this.findEntityById(savedSale.id, manager);
       });
 
+      const itemMessage = savedEntity.items
+          .map(
+            item => `
+      • ${item.product.nameEn}
+        ${item.quantity} × $${item.unitPrice} = $${item.quantity * item.unitPrice}
+      `,
+          )
+          .join('\n');
+
+        const message = `
+      🧾 *PAYMENT RECEIPT*
+
+      🏪 *Mini POS Store*
+
+      ━━━━━━━━━━━━━━
+
+      📄 Invoice: \`${savedEntity.code}\`
+      📅 Date: \`${savedEntity.saleDate}\`
+
+      👤 Customer: *${savedEntity.customer?.nameKh ?? 'Walk-in Customer'}*
+      💳 Payment: *${savedEntity.paymentType?.name}*
+
+      ━━━━━━━━━━━━━━
+
+      📦 *ITEMS*
+
+      ${itemMessage}
+
+      ━━━━━━━━━━━━━━
+
+      💰 *SUMMARY*
+
+      Subtotal : *$${savedEntity.items.reduce(
+        (sum, item) => sum + (item.quantity * item.unitPrice),
+        0,
+      ) }*
+
+      ━━━━━━━━━━━━━━
+
+      👨‍💼 Cashier: *${savedEntity.createdBy.username}*
+
+      ✅ *Payment Successful*
+      `;
+
+        await this.telegramService.sendMessage(
+          '1371216284',
+          message,
+        );
       return SaleMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);

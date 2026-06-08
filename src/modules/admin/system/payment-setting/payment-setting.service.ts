@@ -222,9 +222,9 @@ export class PaymentSettingService extends BasePaginationCrudService<
     try {
       const KHQRString = khqr;
       const isKHQR = BakongKHQR.verify(KHQRString).isValid;
-      if (!isKHQR) {
-        await this.telegramService.sendMessage('1371216284', `Testing Invoice number ${saleNumber}`)
-      }
+      // if (!isKHQR) {
+      //   await this.telegramService.sendMessage('1371216284', `Testing Invoice number ${saleNumber}`)
+      // }
       return isKHQR;
     } catch (error) {
       handleError(error);

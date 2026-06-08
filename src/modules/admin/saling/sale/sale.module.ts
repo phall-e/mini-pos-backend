@@ -5,10 +5,16 @@ import { SaleItemEntity } from './entities/sale-item.entity';
 import { SaleEntity } from './entities/sale.entity';
 import { SaleService } from './sale.service';
 import { SaleController } from './sale.controller';
+import { TelegramModule } from '@telegram/telegram.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([SaleEntity, SaleItemEntity, StockEntity]),
+    TypeOrmModule.forFeature([
+      SaleEntity, 
+      SaleItemEntity, 
+      StockEntity,
+    ]),
+    TelegramModule,
   ],
   controllers: [SaleController],
   providers: [SaleService],
