@@ -23,6 +23,8 @@ import { PurchaseOrderItemEntity } from '@modules/admin/purchasing/purchase-orde
 import { purchaseOrderItems, purchaseOrders } from './purchase-order.seed';
 import { StockEntity } from '@modules/admin/stocking/stock/entities/stock.entity';
 import { stocks } from './stock.seed';
+import { PaymentSettingEntity } from '@modules/admin/system/payment-setting/entities/payment-setting.entity';
+import { paymentSettings } from './payment-setting.seed';
 
 export default class MainSeeder implements Seeder {
   public async run(database: DataSource): Promise<void> {
@@ -77,5 +79,6 @@ export default class MainSeeder implements Seeder {
     await database.manager.save(PurchaseOrderEntity, purchaseOrders);
     await database.manager.save(PurchaseOrderItemEntity, purchaseOrderItems);
     await database.manager.save(StockEntity, stocks);
+    await database.manager.save(PaymentSettingEntity, paymentSettings);
   }
 }

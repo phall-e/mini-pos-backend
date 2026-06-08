@@ -204,6 +204,23 @@ export const permissions = [
     ],
   },
   {
+    name: 'Payment Setting',
+    permissions: [
+      {
+        name: 'payment-setting-read',
+      },
+      {
+        name: 'payment-setting-create',
+      },
+      {
+        name: 'payment-setting-edit',
+      },
+      {
+        name: 'payment-setting-delete',
+      },
+    ],
+  },
+  {
     name: 'Dashboard',
     permissions: [
       {
