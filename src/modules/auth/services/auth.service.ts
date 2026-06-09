@@ -1,6 +1,5 @@
 import { UserService } from '@modules/admin/system/user/user.service';
 import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { LoginRequestDto } from '../dto/login-request.dto';
 import { UserMapper } from '@modules/admin/system/user/user.mapper';
 import { TokenService } from './token.service';
@@ -8,7 +7,7 @@ import { LoginResponseDto } from '../dto/login-response.dto';
 import { PasswordHash } from '@libs/utils/password-hash.util';
 import { handleError } from '@libs/utils/handle-error.util';
 import { generateOpt } from '@libs/utils/otp-generator.util';
-import { TelegramService } from '@telegram/telegram.service';
+import { TelegramService } from '@modules/admin/system/telegram/telegram.service';
 import { VerfiyOtpRequestDto } from '../dto/verify-otp-request.dto';
 import { OtpResponseDto } from '../dto/otp-response.dto';
 

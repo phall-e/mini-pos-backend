@@ -18,7 +18,7 @@ import { SaleItemEntity } from './entities/sale-item.entity';
 import { SaleEntity } from './entities/sale.entity';
 import { SaleItemMapper } from './sale-item.mapper';
 import { SaleMapper } from './sale.mapper';
-import { TelegramService } from '@telegram/telegram.service';
+import { TelegramService } from '@modules/admin/system/telegram/telegram.service';
 
 @Injectable()
 export class SaleService extends BasePaginationCrudService<

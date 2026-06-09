@@ -228,4 +228,21 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Telegram',
+    permissions: [
+      {
+        name: 'telegram-read',
+      },
+      {
+        name: 'telegram-create',
+      },
+      {
+        name: 'telegram-edit',
+      },
+      {
+        name: 'telegram-delete',
+      },
+    ],
+  },
 ];

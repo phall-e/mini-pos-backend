@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PaymentSettingEntity } from './entities/payment-setting.entity';
 import { PaymentSettingService } from './payment-setting.service';
 import { PaymentSettingController } from './payment-setting.controller';
-import { TelegramModule } from '@telegram/telegram.module';
+import { TelegramModule } from '@modules/admin/system/telegram/telegram.module';
 
 @Module({
   imports: [

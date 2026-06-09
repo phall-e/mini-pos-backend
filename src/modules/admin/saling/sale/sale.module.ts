@@ -5,7 +5,7 @@ import { SaleItemEntity } from './entities/sale-item.entity';
 import { SaleEntity } from './entities/sale.entity';
 import { SaleService } from './sale.service';
 import { SaleController } from './sale.controller';
-import { TelegramModule } from '@telegram/telegram.module';
+import { TelegramModule } from '@modules/admin/system/telegram/telegram.module';
 
 @Module({
   imports: [

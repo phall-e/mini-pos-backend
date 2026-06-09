@@ -11,7 +11,7 @@ import { UpdatePaymentSettingRequestDto } from './dto/update-payment-setting-req
 import { PaymentSettingEntity } from './entities/payment-setting.entity';
 import { PaymentSettingMapper } from './payment-setting.mapper';
 import { GenerateQrCodeRequestDto } from './dto/generate-qr-code-request.dto';
-import { TelegramService } from '@telegram/telegram.service';
+import { TelegramService } from '@modules/admin/system/telegram/telegram.service';
 
 const { BakongKHQR, khqrData, MerchantInfo } = require('bakong-khqr');
 

@@ -10,7 +10,7 @@ import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserModule } from '@modules/admin/system/user/user.module';
 import { AuthController } from './auth.controller';
-import { TelegramModule } from '@telegram/telegram.module';
+import { TelegramModule } from '@modules/admin/system/telegram/telegram.module';
 
 @Module({
     imports: [

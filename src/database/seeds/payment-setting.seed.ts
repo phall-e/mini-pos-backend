@@ -6,6 +6,7 @@ export const paymentSettings = [
     logo: null,
     isActive: true,
     isCashed: true,
+    createdById: 1,
   },
   {
     name: 'Main KHQR',

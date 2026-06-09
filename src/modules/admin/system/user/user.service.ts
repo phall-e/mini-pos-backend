@@ -14,7 +14,7 @@ import { UserMapper } from './user.mapper';
 import { BasePaginationCrudService } from '@libs/common/services/base-pagination-crud.service';
 import { PasswordHash } from '@libs/utils/password-hash.util';
 import { handleError } from '@libs/utils/handle-error.util';
-import { TelegramService } from '@telegram/telegram.service';
+import { TelegramService } from '@modules/admin/system/telegram/telegram.service';
 import { generateOpt } from '@libs/utils/otp-generator.util';
 import { ResetUserPasswordRequestDto } from './dto/reset-user-password-request.dto';
 import { VerifyResetUserPasswordRequestDto } from './dto/verify-reset-user-password-request.dto';

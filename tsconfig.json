@@ -34,7 +34,7 @@
         "src/libs/*"
       ],
       "@telegram/*": [
-        "src/telegram/*"
+        "src/modules/admin/system/telegram/*"
       ],
     },
     "incremental": true,
