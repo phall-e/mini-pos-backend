@@ -22,10 +22,10 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get()
-  @Permissions('dashboard-read')
+  // @Permissions('dashboard-read')
   @ApiResponse({ status: 200, type: DashboardResponseDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Forbidden' })
+  // @ApiForbiddenResponse({ description: 'Forbidden' })
   public find(
     @Query() query: DashboardQueryDto,
   ): Promise<DashboardResponseDto> {
