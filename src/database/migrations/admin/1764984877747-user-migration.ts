@@ -52,6 +52,12 @@ export class UserMigration1764984877747 implements MigrationInterface {
                         default: true,
                     },
                     {
+                        name: 'is_required_opt',
+                        type: 'boolean',
+                        default: true,
+                        isNullable: true,
+                    },
+                    {
                         name: 'is_admin',
                         type: 'boolean',
                         default: null,

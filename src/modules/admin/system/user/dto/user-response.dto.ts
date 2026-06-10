@@ -15,6 +15,9 @@ export class UserResponseDto {
   telegramChatId: string;
 
   @ApiProperty()
+  isRequiredOtp: boolean;
+
+  @ApiProperty()
   isAdmin: boolean;
 
   @ApiProperty()

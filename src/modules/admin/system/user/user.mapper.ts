@@ -13,6 +13,7 @@ export class UserMapper {
     dto.username = entity.username;
     dto.email = entity.email;
     dto.telegramChatId = entity.telegramChatId;
+    dto.isRequiredOtp = entity.isRequiredOtp;
     dto.isAdmin = entity.isAdmin;
     dto.isActive = entity.isActive;
     dto.createdAt = entity.createdAt;
@@ -30,6 +31,7 @@ export class UserMapper {
     dto.username = entity.username;
     dto.email = entity.email;
     dto.telegramChatId = entity.telegramChatId;
+    dto.isRequiredOtp = entity.isRequiredOtp;
     dto.isAdmin = entity.isAdmin;
     dto.isActive = entity.isActive;
     dto.createdAt = entity.createdAt;
@@ -53,6 +55,7 @@ export class UserMapper {
     entity.email = dto.email;
     entity.password = dto.password;
     entity.telegramChatId = dto.telegramChatId;
+    entity.isRequiredOtp = dto.isRequiredOtp;
     entity.isAdmin = dto.isAdmin;
     entity.isActive = dto.isActive;
     if (dto.roles?.length) {
@@ -71,6 +74,7 @@ export class UserMapper {
     entity.username = dto.username ?? entity.username;
     entity.email = dto.email ?? entity.email;
     entity.telegramChatId = dto.telegramChatId ?? entity.telegramChatId;
+    entity.isRequiredOtp = dto.isRequiredOtp;
     entity.isAdmin = dto.isAdmin ?? entity.isAdmin;
     entity.isActive = dto.isActive ?? entity.isActive;
 

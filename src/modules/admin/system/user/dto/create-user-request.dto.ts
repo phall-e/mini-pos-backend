@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsEmail,
   IsInt,
   IsNotEmpty,
@@ -24,6 +25,11 @@ export class CreateUserRequestDto {
   @IsNotEmpty()
   @IsString()
   password: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsBoolean()
+  isRequiredOtp: boolean;
 
   @ApiProperty()
   @IsOptional()

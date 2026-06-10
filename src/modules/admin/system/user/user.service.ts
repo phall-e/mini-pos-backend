@@ -25,9 +25,9 @@ export class UserService extends BasePaginationCrudService<
   UserEntity,
   UserResponseDto
 > {
-  protected SORTABLE_COLUMNS = ['id', 'username', 'isAdmin', 'isActive'];
-  protected FILTER_COLUMNS = ['username', 'isAdmin', 'isActive'];
-  protected SEARCHABLE_COLUMNS = ['username', 'isAdmin', 'isActive'];
+  protected SORTABLE_COLUMNS = ['id', 'username', 'isAdmin', 'isActive', 'isRequiredOtp'];
+  protected FILTER_COLUMNS = ['username', 'isAdmin', 'isActive', 'isRequiredOtp'];
+  protected SEARCHABLE_COLUMNS = ['username', 'isAdmin', 'isActive', 'isRequiredOtp'];
   protected RELATIONSIP_FIELDS = ['roles'];
 
   constructor(

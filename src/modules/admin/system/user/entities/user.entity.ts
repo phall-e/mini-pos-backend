@@ -57,6 +57,14 @@ export class UserEntity extends BaseEntity {
     otpCode: string;
 
     @Column({
+        name: 'is_required_opt',
+        type: 'boolean',
+        default: null,
+        nullable: true,
+    })
+    isRequiredOtp: boolean;
+
+    @Column({
         name: 'is_admin',
         type: 'boolean',
         default: null,
