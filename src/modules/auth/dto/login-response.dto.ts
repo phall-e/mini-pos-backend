@@ -14,5 +14,8 @@ export class LoginResponseDto {
     status: 200;
 
     @ApiProperty()
+    isRequiredOtp: boolean;
+
+    @ApiProperty()
     message: string;
 }

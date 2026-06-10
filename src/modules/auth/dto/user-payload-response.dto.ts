@@ -11,6 +11,9 @@ export class UserPayloadResponseDto {
     email: string;
 
     @ApiProperty()
+    isRequiredOtp: boolean;
+
+    @ApiProperty()
     isAdmin: boolean;
 
     @ApiProperty()

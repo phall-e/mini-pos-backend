@@ -13,4 +13,7 @@ export class OtpResponseDto {
         type: () => TokenResponseDto,
     })
     token: TokenResponseDto;
+
+    @ApiProperty()
+    IsRequiredOtp: boolean;
 }

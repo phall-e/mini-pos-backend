@@ -19,7 +19,7 @@ export class AuthController {
     @ApiResponse({ status: 201, type: LoginResponseDto })
     @ApiUnauthorizedResponse({ description: 'Unuthorized' })
     @ApiForbiddenResponse({ description: 'User is inactive' })
-    public login(@Body() dto: LoginRequestDto): Promise<LoginResponseDto> {
+    public login(@Body() dto: LoginRequestDto): Promise<LoginResponseDto | OtpResponseDto> {
         return this.authService.login(dto);
     }
 

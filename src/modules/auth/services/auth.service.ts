@@ -19,7 +19,7 @@ export class AuthService {
         private telegramService: TelegramService,
     ){}
 
-    public async login(dto: LoginRequestDto): Promise<LoginResponseDto> {
+    public async login(dto: LoginRequestDto): Promise<LoginResponseDto | OtpResponseDto> {
         try {
             const user = await this.userService.findOneByUsername(dto.username);
             if (!user) throw new UnauthorizedException();
@@ -27,19 +27,25 @@ export class AuthService {
             const isMatched = await PasswordHash.verify(dto.password, user.password);
             if (!isMatched) throw new UnauthorizedException();
 
-            const opt = generateOpt();
-            await this.userService.updateOtp(user.id, opt);
-            await this.telegramService.sendMessage(
-                user.telegramChatId,
-                `Your OTP is ${opt}`,
-            );
+            if (user.isRequiredOtp) {
+                const opt = generateOpt();
+                await this.userService.updateOtp(user.id, opt);
+                await this.telegramService.sendMessage(
+                    user.telegramChatId,
+                    `Your OTP is ${opt}`,
+                );
 
-            return {
-                success: true,
-                username: user.username,
-                status: 200,
-                message: 'OTP sent to Telegram',
-            };
+                return {
+                    success: true,
+                    username: user.username,
+                    status: 200,
+                    isRequiredOtp: user.isRequiredOtp,
+                    message: 'OTP sent to Telegram',
+                };
+            }
+
+            const payload = await this.payloadGenerate(user.username);
+            return payload;
         } catch (error) {
             handleError(error);
         }
@@ -54,38 +60,48 @@ export class AuthService {
 
             await this.userService.updateOtp(user.id, null); 
 
-            const payload = {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                isAdmin: user.isAdmin,
-                isActive: user.isActive,
-                createdAt: user.createdAt,
-                updatedAt: user.updatedAt,
-                deletedAt: user.deletedAt,
-            };
+            const payload = await this.payloadGenerate(user.username);
+            return payload;
 
-            const roles = await user.roles;
-            const allPermissions = await Promise.all(
-                roles.map(role => role.permissions).map(async (perm) => (await perm).flatMap(p => p.name)),
-            );
-            const uniquePermissions = Array.from(new Set(allPermissions.flat()));
-            const userMapped = await UserMapper.toDto(user);
-            const userRoles = roles.map(item => item.name);
-
-
-            const token = await this.tokenService.generateAuthToken(payload);
-            return {
-                users: {
-                    ...userMapped,
-                    roles: userRoles,
-                    permissions: uniquePermissions,
-                },
-                token,
-            };
         } catch (error) {
             handleError(error);
         }
+    }
+
+    private async payloadGenerate(username: string): Promise<OtpResponseDto> {
+        const user = await this.userService.findOneByUsername(username);
+        if (!user) throw new UnauthorizedException();
+        const payload = {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            isRequiredOtp: user.isRequiredOtp,
+            isAdmin: user.isAdmin,
+            isActive: user.isActive,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            deletedAt: user.deletedAt,
+        };
+
+        const roles = await user.roles;
+        const allPermissions = await Promise.all(
+            roles.map(role => role.permissions).map(async (perm) => (await perm).flatMap(p => p.name)),
+        );
+        const uniquePermissions = Array.from(new Set(allPermissions.flat()));
+        const userMapped = await UserMapper.toDto(user);
+        const userRoles = roles.map(item => item.name);
+
+
+        const token = await this.tokenService.generateAuthToken(payload);
+        return {
+            users: {
+                ...userMapped,
+                roles: userRoles,
+                permissions: uniquePermissions,
+            },
+            token,
+            IsRequiredOtp: user.isRequiredOtp,
+        };
     }
 
 }
