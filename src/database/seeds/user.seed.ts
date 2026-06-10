@@ -17,4 +17,12 @@ export const users = [
         isAdmin: true,
         isActive: true,
     },
+    {
+        username: 'guest',
+        email: 'guest@gmail.com',
+        password: '123',
+        // telegramChatId: '1371216284',
+        isRequiredOtp: false,
+        isActive: true,
+    },
 ];

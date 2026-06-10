@@ -221,14 +221,6 @@ export const permissions = [
     ],
   },
   {
-    name: 'Dashboard',
-    permissions: [
-      {
-        name: 'dashboard-read',
-      },
-    ],
-  },
-  {
     name: 'Telegram',
     permissions: [
       {

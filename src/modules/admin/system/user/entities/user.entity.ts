@@ -42,7 +42,6 @@ export class UserEntity extends BaseEntity {
         name: 'telegram_chat_id',
         type: 'varchar',
         length: '100',
-        unique: true,
         nullable: true,
     })
     telegramChatId: string;
