@@ -8,7 +8,9 @@ import { UpdateProductRequestDto } from './dto/update-product-request.dto';
 import { ProductEntity } from './entities/product.entity';
 
 export class ProductMapper {
-  public static async toDto(entity: ProductEntity): Promise<ProductResponseDto> {
+  public static async toDto(
+    entity: ProductEntity,
+  ): Promise<ProductResponseDto> {
     const dto = new ProductResponseDto();
 
     dto.id = entity.id;
@@ -20,6 +22,7 @@ export class ProductMapper {
     dto.description = entity.description;
     dto.thumbnail = entity.thumbnail;
     dto.unitPrice = Number(entity.unitPrice);
+    dto.discount = Number(entity.discount ?? 0);
     dto.createdById = entity.createdById;
     dto.createdAt = entity.createdAt;
     dto.updatedAt = entity.updatedAt;
@@ -64,6 +67,7 @@ export class ProductMapper {
     entity.description = dto.description;
     entity.thumbnail = dto.thumbnail;
     entity.unitPrice = dto.unitPrice;
+    entity.discount = dto.discount ?? 0;
     entity.createdById = dto.createdById;
 
     return entity;
@@ -81,6 +85,7 @@ export class ProductMapper {
     entity.description = dto.description ?? entity.description;
     entity.thumbnail = dto.thumbnail ?? entity.thumbnail;
     entity.unitPrice = dto.unitPrice ?? entity.unitPrice;
+    entity.discount = dto.discount ?? entity.discount;
     entity.createdById = dto.createdById ?? entity.createdById;
 
     return entity;

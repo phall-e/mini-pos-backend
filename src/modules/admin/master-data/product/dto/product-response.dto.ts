@@ -39,6 +39,9 @@ export class ProductResponseDto {
   unitPrice: number;
 
   @ApiProperty()
+  discount: number;
+
+  @ApiProperty()
   createdById: number;
 
   @ApiProperty()

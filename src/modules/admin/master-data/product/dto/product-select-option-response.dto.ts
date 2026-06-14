@@ -12,4 +12,5 @@ export class ProductSelectOptionResponseDto {
 
   @ApiProperty()
   nameKh: string;
+
 }

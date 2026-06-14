@@ -8,6 +8,7 @@ export const products = [
     description: 'Pure drinking water bottle 500ml',
     thumbnail: null,
     unitPrice: 0.5,
+    discount: 0,
     createdById: 1,
   },
   {
@@ -19,6 +20,7 @@ export const products = [
     description: 'Carbonated cola soft drink',
     thumbnail: null,
     unitPrice: 0.75,
+    discount: 0,
     createdById: 1,
   },
   {
@@ -30,6 +32,7 @@ export const products = [
     description: 'Steamed rice serving',
     thumbnail: null,
     unitPrice: 1.25,
+    discount: 0,
     createdById: 1,
   },
   {
@@ -41,6 +44,7 @@ export const products = [
     description: 'Crispy potato snack',
     thumbnail: null,
     unitPrice: 1.1,
+    discount: 0,
     createdById: 1,
   },
   {
@@ -52,6 +56,7 @@ export const products = [
     description: 'Fresh bakery bread loaf',
     thumbnail: null,
     unitPrice: 1.5,
+    discount: 0,
     createdById: 1,
   },
   {
@@ -63,6 +68,7 @@ export const products = [
     description: 'Fresh dairy milk bottle',
     thumbnail: null,
     unitPrice: 2.25,
+    discount: 0,
     createdById: 1,
   },
   {
@@ -74,6 +80,7 @@ export const products = [
     description: 'Hand washing liquid soap',
     thumbnail: null,
     unitPrice: 2.75,
+    discount: 0,
     createdById: 1,
   },
   {
@@ -85,6 +92,7 @@ export const products = [
     description: 'Personal care shampoo bottle',
     thumbnail: null,
     unitPrice: 3.5,
+    discount: 0,
     createdById: 1,
   },
   {
@@ -96,6 +104,7 @@ export const products = [
     description: 'Household tissue roll',
     thumbnail: null,
     unitPrice: 0.85,
+    discount: 0,
     createdById: 1,
   },
   {
@@ -107,6 +116,7 @@ export const products = [
     description: 'Frozen dessert box',
     thumbnail: null,
     unitPrice: 4.25,
+    discount: 0,
     createdById: 1,
   },
 ];

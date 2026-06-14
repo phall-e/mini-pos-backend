@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Min,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
@@ -58,8 +59,15 @@ export class CreateProductRequestDto {
   @ApiProperty({ example: 1.5 })
   @IsNotEmpty()
   @IsNumber({ maxDecimalPlaces: 2 })
-//   @Type(() => Number)
+  @Type(() => Number)
   unitPrice: number;
+
+  @ApiProperty({ required: false, example: 0 })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Type(() => Number)
+  discount?: number;
 
   createdById: number;
 }
