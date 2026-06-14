@@ -36,9 +36,6 @@ export class SaleResponseDto {
   note: string | null;
 
   @ApiProperty()
-  discount: number;
-
-  @ApiProperty()
   createdById: number;
 
   @ApiProperty()
@@ -58,6 +55,9 @@ export class SaleResponseDto {
 
   @ApiProperty()
   totalAmount: number;
+
+  @ApiProperty()
+  netAmount: number;
 
   @ApiProperty()
   createdAt: Date;

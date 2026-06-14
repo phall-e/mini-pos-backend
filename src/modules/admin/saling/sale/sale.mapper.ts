@@ -17,7 +17,6 @@ export class SaleMapper {
     dto.customerId = entity.customerId;
     dto.paymentTypeId = entity.paymentTypeId;
     dto.note = entity.note;
-    dto.discount = Number(entity.discount ?? 0);
     dto.createdById = entity.createdById;
     dto.attachments = entity.attachments;
     dto.status = entity.status;
@@ -31,11 +30,15 @@ export class SaleMapper {
       (total, item) => total + item.quantity,
       0,
     );
-    const subtotalAmount = dto.items.reduce(
+    dto.totalAmount = dto.items.reduce(
       (total, item) => total + item.quantity * item.unitPrice,
       0,
     );
-    dto.totalAmount = Math.max(subtotalAmount - dto.discount, 0);
+    dto.netAmount = dto.items.reduce(
+      (total, item) =>
+        total + Math.max(item.quantity * item.unitPrice - item.discount, 0),
+      0,
+    );
 
     if (entity.customer) {
       dto.customer = await CustomerMapper.toDto(entity.customer);
@@ -60,7 +63,6 @@ export class SaleMapper {
     entity.customerId = dto.customerId;
     entity.paymentTypeId = dto.paymentTypeId;
     entity.note = dto.note;
-    entity.discount = dto.discount ?? 0;
     entity.createdById = dto.createdById;
     entity.attachments = dto.attachments;
     entity.status = dto.status ?? SaleStatus.PENDING;
@@ -80,7 +82,6 @@ export class SaleMapper {
         ? dto.paymentTypeId
         : entity.paymentTypeId;
     entity.note = dto.note !== undefined ? dto.note : entity.note;
-    entity.discount = dto.discount ?? entity.discount;
     entity.createdById = dto.createdById ?? entity.createdById;
     entity.attachments =
       dto.attachments !== undefined ? dto.attachments : entity.attachments;

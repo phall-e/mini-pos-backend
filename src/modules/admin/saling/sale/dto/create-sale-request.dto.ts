@@ -8,11 +8,9 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
-  IsNumber,
   IsObject,
   IsOptional,
   IsString,
-  Min,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
@@ -52,13 +50,6 @@ export class CreateSaleRequestDto {
   @IsOptional()
   @IsString()
   note?: string | null;
-
-  @ApiProperty({ required: false, example: 0 })
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Type(() => Number)
-  discount?: number;
 
   @ApiProperty({
     required: false,

@@ -20,6 +20,9 @@ export class SaleItemResponseDto {
   @ApiProperty()
   unitPrice: number;
 
+  @ApiProperty()
+  discount: number;
+
   @ApiProperty({ required: false, nullable: true })
   note: string | null;
 

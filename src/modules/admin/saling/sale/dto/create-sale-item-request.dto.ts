@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
 
 export class CreateSaleItemRequestDto {
@@ -26,6 +27,13 @@ export class CreateSaleItemRequestDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @Type(() => Number)
   unitPrice: number;
+
+  @ApiProperty({ required: false, example: 0 })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Type(() => Number)
+  discount?: number;
 
   @ApiProperty({ required: false, nullable: true })
   @IsOptional()

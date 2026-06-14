@@ -85,16 +85,6 @@ export class SaleEntity extends BaseEntity {
   note: string | null;
 
   @Column({
-    name: 'discount',
-    type: 'decimal',
-    precision: 14,
-    scale: 2,
-    nullable: false,
-    default: 0,
-  })
-  discount: number;
-
-  @Column({
     name: 'created_by_id',
     type: 'integer',
     nullable: false,

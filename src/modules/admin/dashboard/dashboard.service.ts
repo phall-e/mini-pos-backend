@@ -116,7 +116,18 @@ export class DashboardService {
             sale.id,
             COALESCE(SUM(item.quantity), 0) AS total_quantity,
             GREATEST(
-              COALESCE(SUM(item.quantity * item.unit_price), 0) - COALESCE(sale.discount, 0),
+              COALESCE(
+                SUM(
+                  GREATEST(
+                    COALESCE(
+                      item.quantity * item.unit_price - COALESCE(item.discount, 0),
+                      0
+                    ),
+                    0
+                  )
+                ),
+                0
+              ),
               0
             ) AS total_amount
           FROM admin.sales sale
@@ -125,7 +136,7 @@ export class DashboardService {
             AND sale.status != $1
             AND sale.sale_date >= $2
             AND sale.sale_date < $3
-          GROUP BY DATE_TRUNC('month', sale.sale_date), sale.id, sale.discount
+          GROUP BY DATE_TRUNC('month', sale.sale_date), sale.id
         ) sale_summary
         GROUP BY sale_summary.month
         ORDER BY sale_summary.month ASC
@@ -160,7 +171,18 @@ export class DashboardService {
           SELECT
             sale.id,
             GREATEST(
-              COALESCE(SUM(item.quantity * item.unit_price), 0) - COALESCE(sale.discount, 0),
+              COALESCE(
+                SUM(
+                  GREATEST(
+                    COALESCE(
+                      item.quantity * item.unit_price - COALESCE(item.discount, 0),
+                      0
+                    ),
+                    0
+                  )
+                ),
+                0
+              ),
               0
             ) AS total_amount
           FROM admin.sales sale
@@ -169,7 +191,7 @@ export class DashboardService {
             AND sale.status != $1
             AND sale.sale_date >= $2
             AND sale.sale_date < $3
-          GROUP BY sale.id, sale.discount
+          GROUP BY sale.id
         ) sale_summary
       `,
       [SaleStatus.CANCELLED, startDate, endDate],

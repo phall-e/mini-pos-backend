@@ -71,6 +71,16 @@ export class SaleItemEntity extends BaseEntity {
   unitPrice: number;
 
   @Column({
+    name: 'discount',
+    type: 'decimal',
+    precision: 14,
+    scale: 2,
+    nullable: false,
+    default: 0,
+  })
+  discount: number;
+
+  @Column({
     name: 'note',
     type: 'text',
     nullable: true,
