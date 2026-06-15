@@ -26,6 +26,8 @@ import { CreateStockAdjustmentRequestDto } from './dto/create-stock-adjustment-r
 import { StockAdjustmentResponseDto } from './dto/stock-adjustment-response.dto';
 import { UpdateStockAdjustmentRequestDto } from './dto/update-stock-adjustment-request.dto';
 import { StockAdjustmentEntity } from './entities/stock-adjustment.entity';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('Stock Adjustment')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -46,11 +48,15 @@ export class StockAdjustmentController {
   public create(
     @Body() dto: CreateStockAdjustmentRequestDto,
     @CurrentUser() user: UserEntity,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<StockAdjustmentResponseDto> {
-    return this.stockAdjustmentService.create({
-      ...dto,
-      createdById: user.id,
-    });
+    return this.stockAdjustmentService.create(
+      {
+        ...dto,
+        createdById: user.id,
+      },
+      logMeta,
+    );
   }
 
   @Get()
@@ -83,8 +89,9 @@ export class StockAdjustmentController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdateStockAdjustmentRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<StockAdjustmentResponseDto> {
-    return this.stockAdjustmentService.update(+id, dto);
+    return this.stockAdjustmentService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -92,7 +99,10 @@ export class StockAdjustmentController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.stockAdjustmentService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.stockAdjustmentService.remove(+id, logMeta);
   }
 }

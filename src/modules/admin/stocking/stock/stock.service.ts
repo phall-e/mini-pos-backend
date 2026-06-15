@@ -8,6 +8,8 @@ import { StockResponseDto } from './dto/stock-response.dto';
 import { UpdateStockRequestDto } from './dto/update-stock-request.dto';
 import { StockEntity } from './entities/stock.entity';
 import { StockMapper } from './stock.mapper';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @Injectable()
 export class StockService extends BasePaginationCrudService<
@@ -36,6 +38,7 @@ export class StockService extends BasePaginationCrudService<
   constructor(
     @InjectRepository(StockEntity)
     private readonly stockRepository: Repository<StockEntity>,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -50,10 +53,20 @@ export class StockService extends BasePaginationCrudService<
     return StockMapper.toDto(entity);
   }
 
-  public async create(dto: CreateStockRequestDto): Promise<StockResponseDto> {
+  public async create(
+    dto: CreateStockRequestDto,
+    logMeta?: LogActivityMeta,
+  ): Promise<StockResponseDto> {
     try {
       const entity = StockMapper.toCreateEntity(dto);
       const savedEntity = await this.stockRepository.save(entity);
+      await this.logActivityService.record({
+        userId: dto.createdById,
+        ...logMeta,
+        module: 'stock',
+        action: 'create',
+        description: `create Stock product #${savedEntity.productId}`,
+      });
       return this.findOneEntityToDto(savedEntity.id);
     } catch (error) {
       handleError(error);
@@ -71,6 +84,7 @@ export class StockService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdateStockRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<StockResponseDto> {
     try {
       const entity = await this.stockRepository.findOne({
@@ -84,13 +98,20 @@ export class StockService extends BasePaginationCrudService<
 
       const updatedEntity = StockMapper.toUpdateEntity(entity, dto);
       const savedEntity = await this.stockRepository.save(updatedEntity);
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? savedEntity.createdById,
+        module: 'stock',
+        action: 'update',
+        description: `update Stock product #${savedEntity.productId}`,
+      });
       return this.findOneEntityToDto(savedEntity.id);
     } catch (error) {
       handleError(error);
     }
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
       const entity = await this.stockRepository.findOne({
         where: {
@@ -102,6 +123,13 @@ export class StockService extends BasePaginationCrudService<
       }
 
       await this.stockRepository.softRemove(entity);
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? entity.createdById,
+        module: 'stock',
+        action: 'delete',
+        description: `delete Stock product #${entity.productId}`,
+      });
     } catch (error) {
       handleError(error);
     }

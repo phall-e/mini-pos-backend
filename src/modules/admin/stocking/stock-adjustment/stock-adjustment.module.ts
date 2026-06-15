@@ -4,9 +4,13 @@ import { StockEntity } from '../stock/entities/stock.entity';
 import { StockAdjustmentService } from './stock-adjustment.service';
 import { StockAdjustmentController } from './stock-adjustment.controller';
 import { StockAdjustmentEntity } from './entities/stock-adjustment.entity';
+import { LogActivityModule } from '@modules/admin/system/log-activity/log-activity.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([StockAdjustmentEntity, StockEntity])],
+  imports: [
+    TypeOrmModule.forFeature([StockAdjustmentEntity, StockEntity]),
+    LogActivityModule,
+  ],
   controllers: [StockAdjustmentController],
   providers: [StockAdjustmentService],
 })

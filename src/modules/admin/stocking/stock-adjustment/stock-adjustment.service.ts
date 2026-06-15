@@ -9,6 +9,8 @@ import { StockAdjustmentResponseDto } from './dto/stock-adjustment-response.dto'
 import { UpdateStockAdjustmentRequestDto } from './dto/update-stock-adjustment-request.dto';
 import { StockAdjustmentEntity } from './entities/stock-adjustment.entity';
 import { StockAdjustmentMapper } from './stock-adjustment.mapper';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @Injectable()
 export class StockAdjustmentService extends BasePaginationCrudService<
@@ -36,6 +38,7 @@ export class StockAdjustmentService extends BasePaginationCrudService<
     @InjectRepository(StockAdjustmentEntity)
     private readonly stockAdjustmentRepository: Repository<StockAdjustmentEntity>,
     private readonly dataSource: DataSource,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -52,6 +55,7 @@ export class StockAdjustmentService extends BasePaginationCrudService<
 
   public async create(
     dto: CreateStockAdjustmentRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<StockAdjustmentResponseDto> {
     try {
       const savedEntity = await this.dataSource.transaction(async (manager) => {
@@ -71,6 +75,13 @@ export class StockAdjustmentService extends BasePaginationCrudService<
         return this.findEntityById(savedAdjustment.id, manager);
       });
 
+      await this.logActivityService.record({
+        userId: dto.createdById,
+        ...logMeta,
+        module: 'stock-adjustment',
+        action: 'create',
+        description: `create Stock Adjustment product #${savedEntity.productId}`,
+      });
       return StockAdjustmentMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
@@ -93,6 +104,7 @@ export class StockAdjustmentService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdateStockAdjustmentRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<StockAdjustmentResponseDto> {
     try {
       const savedEntity = await this.dataSource.transaction(async (manager) => {
@@ -127,14 +139,23 @@ export class StockAdjustmentService extends BasePaginationCrudService<
         return this.findEntityById(savedAdjustment.id, manager);
       });
 
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? savedEntity.createdById,
+        module: 'stock-adjustment',
+        action: 'update',
+        description: `update Stock Adjustment product #${savedEntity.productId}`,
+      });
       return StockAdjustmentMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
     }
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
+      let removedEntity: StockAdjustmentEntity;
+
       await this.dataSource.transaction(async (manager) => {
         const entity = await this.findEntityById(id, manager);
         if (!entity) {
@@ -148,6 +169,15 @@ export class StockAdjustmentService extends BasePaginationCrudService<
           manager,
         );
         await manager.softRemove(StockAdjustmentEntity, entity);
+        removedEntity = entity;
+      });
+
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? removedEntity.createdById,
+        module: 'stock-adjustment',
+        action: 'delete',
+        description: `delete Stock Adjustment product #${removedEntity.productId}`,
       });
     } catch (error) {
       handleError(error);

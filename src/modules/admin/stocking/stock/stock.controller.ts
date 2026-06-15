@@ -26,6 +26,8 @@ import { CreateStockRequestDto } from './dto/create-stock-request.dto';
 import { StockResponseDto } from './dto/stock-response.dto';
 import { UpdateStockRequestDto } from './dto/update-stock-request.dto';
 import { StockEntity } from './entities/stock.entity';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('Stock')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -44,11 +46,15 @@ export class StockController {
   public create(
     @Body() dto: CreateStockRequestDto,
     @CurrentUser() user: UserEntity,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<StockResponseDto> {
-    return this.stockService.create({
-      ...dto,
-      createdById: user.id,
-    });
+    return this.stockService.create(
+      {
+        ...dto,
+        createdById: user.id,
+      },
+      logMeta,
+    );
   }
 
   @Get()
@@ -79,8 +85,9 @@ export class StockController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdateStockRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<StockResponseDto> {
-    return this.stockService.update(+id, dto);
+    return this.stockService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -88,7 +95,10 @@ export class StockController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.stockService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.stockService.remove(+id, logMeta);
   }
 }
