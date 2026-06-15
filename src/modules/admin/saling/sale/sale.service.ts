@@ -19,6 +19,8 @@ import { SaleEntity } from './entities/sale.entity';
 import { SaleItemMapper } from './sale-item.mapper';
 import { SaleMapper } from './sale.mapper';
 import { TelegramService } from '@modules/admin/system/telegram/telegram.service';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @Injectable()
 export class SaleService extends BasePaginationCrudService<
@@ -59,6 +61,7 @@ export class SaleService extends BasePaginationCrudService<
     private readonly saleRepository: Repository<SaleEntity>,
     private readonly dataSource: DataSource,
     private readonly telegramService: TelegramService,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -73,7 +76,10 @@ export class SaleService extends BasePaginationCrudService<
     return SaleMapper.toDto(entity);
   }
 
-  public async create(dto: CreateSaleRequestDto): Promise<SaleResponseDto> {
+  public async create(
+    dto: CreateSaleRequestDto,
+    logMeta?: LogActivityMeta,
+  ): Promise<SaleResponseDto> {
     try {
       const savedEntity = await this.dataSource.transaction(async (manager) => {
         const sale = SaleMapper.toCreateEntity({
@@ -91,16 +97,24 @@ export class SaleService extends BasePaginationCrudService<
         return this.findEntityById(savedSale.id, manager);
       });
 
+      await this.logActivityService.record({
+        userId: dto.createdById,
+        ...logMeta,
+        module: 'sale',
+        action: 'create',
+        description: `create Sale ${savedEntity.code}`,
+      });
+
       const itemMessage = savedEntity.items
-          .map(
-            item => `
+        .map(
+          (item) => `
       • ${item.product.nameEn}
         ${item.quantity} × $${item.unitPrice} = $${item.quantity * item.unitPrice}
       `,
-          )
-          .join('\n');
+        )
+        .join('\n');
 
-        const message = `
+      const message = `
       🧾 *PAYMENT RECEIPT*
 
       🏪 *Mini POS Store*
@@ -124,9 +138,9 @@ export class SaleService extends BasePaginationCrudService<
       💰 *SUMMARY*
 
       Subtotal : *$${savedEntity.items.reduce(
-        (sum, item) => sum + (item.quantity * item.unitPrice),
+        (sum, item) => sum + item.quantity * item.unitPrice,
         0,
-      ) }*
+      )}*
 
       ━━━━━━━━━━━━━━
 
@@ -135,10 +149,7 @@ export class SaleService extends BasePaginationCrudService<
       ✅ *Payment Successful*
       `;
 
-        await this.telegramService.sendMessage(
-          '1371216284',
-          message,
-        );
+      await this.telegramService.sendMessage('1371216284', message);
       return SaleMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
@@ -171,6 +182,7 @@ export class SaleService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdateSaleRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<SaleResponseDto> {
     try {
       const savedEntity = await this.dataSource.transaction(async (manager) => {
@@ -204,14 +216,23 @@ export class SaleService extends BasePaginationCrudService<
         return reloadedEntity;
       });
 
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? savedEntity.createdById,
+        module: 'sale',
+        action: 'update',
+        description: `update Sale ${savedEntity.code}`,
+      });
       return SaleMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
     }
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
+      let removedEntity: SaleEntity;
+
       await this.dataSource.transaction(async (manager) => {
         const entity = await this.findEntityById(id, manager);
         if (!entity) {
@@ -230,6 +251,15 @@ export class SaleService extends BasePaginationCrudService<
         }
 
         await manager.softRemove(SaleEntity, entity);
+        removedEntity = entity;
+      });
+
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? removedEntity.createdById,
+        module: 'sale',
+        action: 'delete',
+        description: `delete Sale ${removedEntity.code}`,
       });
     } catch (error) {
       handleError(error);

@@ -27,6 +27,8 @@ import { SaleResponseDto } from './dto/sale-response.dto';
 import { UpdateSaleRequestDto } from './dto/update-sale-request.dto';
 import { SaleEntity } from './entities/sale.entity';
 import { SaleService } from './sale.service';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('Sale')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -45,11 +47,15 @@ export class SaleController {
   public create(
     @Body() dto: CreateSaleRequestDto,
     @CurrentUser() user: UserEntity,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<SaleResponseDto> {
-    return this.saleService.create({
-      ...dto,
-      createdById: user.id,
-    });
+    return this.saleService.create(
+      {
+        ...dto,
+        createdById: user.id,
+      },
+      logMeta,
+    );
   }
 
   @Get()
@@ -89,8 +95,9 @@ export class SaleController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdateSaleRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<SaleResponseDto> {
-    return this.saleService.update(+id, dto);
+    return this.saleService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -98,7 +105,10 @@ export class SaleController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.saleService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.saleService.remove(+id, logMeta);
   }
 }
