@@ -237,4 +237,12 @@ export const permissions = [
       },
     ],
   },
+  {
+    name: 'Log Activity',
+    permissions: [
+      {
+        name: 'log-activity-read',
+      },
+    ],
+  },
 ];
