@@ -27,6 +27,8 @@ import { CurrentUser } from '@modules/auth/decorators/current-user.decorator';
 import { UserEntity } from '@modules/admin/system/user/entities/user.entity';
 import { Permissions } from '@modules/auth/decorators/permissions.decorator';
 import { CategorySelectOptionResponseDto } from './dto/category-select-option-response.dto';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('Category')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -45,11 +47,15 @@ export class CategoryController {
   public create(
     @Body() dto: CreateCategoryRequestDto,
     @CurrentUser() user: UserEntity,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<CategoryResponseDto> {
-    return this.categoryService.create({
-      ...dto,
-      createdById: user.id,
-    });
+    return this.categoryService.create(
+      {
+        ...dto,
+        createdById: user.id,
+      },
+      logMeta,
+    );
   }
 
   @Get()
@@ -89,8 +95,9 @@ export class CategoryController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdateCategoryRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<CategoryResponseDto> {
-    return this.categoryService.update(+id, dto);
+    return this.categoryService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -98,7 +105,10 @@ export class CategoryController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.categoryService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.categoryService.remove(+id, logMeta);
   }
 }

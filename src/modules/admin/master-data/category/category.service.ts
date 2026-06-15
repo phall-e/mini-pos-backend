@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { CategoryMapper } from './category.mapper';
 import { handleError } from '@libs/utils/handle-error.util';
 import { CategorySelectOptionResponseDto } from './dto/category-select-option-response.dto';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @Injectable()
 export class CategoryService extends BasePaginationCrudService<
@@ -29,6 +31,7 @@ export class CategoryService extends BasePaginationCrudService<
   constructor(
     @InjectRepository(CategoryEntity)
     private readonly categoryRepository: Repository<CategoryEntity>,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -45,10 +48,18 @@ export class CategoryService extends BasePaginationCrudService<
 
   public async create(
     dto: CreateCategoryRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<CategoryResponseDto> {
     try {
       const entity = CategoryMapper.toCreateEntity(dto);
       const savedEntity = await this.categoryRepository.save(entity);
+      await this.logActivityService.record({
+        userId: dto.createdById,
+        ...logMeta,
+        module: 'category',
+        action: 'create',
+        description: `create Category ${savedEntity.code}`,
+      });
       return CategoryMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
@@ -97,6 +108,7 @@ export class CategoryService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdateCategoryRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<CategoryResponseDto> {
     try {
       const entity = await this.categoryRepository.findOne({
@@ -110,13 +122,19 @@ export class CategoryService extends BasePaginationCrudService<
 
       const updatedEntity = CategoryMapper.toUpdateEntity(entity, dto);
       const savedEntity = await this.categoryRepository.save(updatedEntity);
+      await this.logActivityService.record({
+        ...logMeta,
+        module: 'category',
+        action: 'update',
+        description: `update Category ${savedEntity.code}`,
+      });
       return CategoryMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
     }
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
       const entity = await this.categoryRepository.findOne({
         where: {
@@ -128,6 +146,13 @@ export class CategoryService extends BasePaginationCrudService<
       }
 
       await this.categoryRepository.softRemove(entity);
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? entity.createdById,
+        module: 'category',
+        action: 'delete',
+        description: `delete Category ${entity.code}`,
+      });
     } catch (error) {
       handleError(error);
     }

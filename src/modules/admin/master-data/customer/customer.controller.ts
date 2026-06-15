@@ -27,6 +27,8 @@ import { CustomerResponseDto } from './dto/customer-response.dto';
 import { CustomerSelectOptionResponseDto } from './dto/customer-select-option-response.dto';
 import { UpdateCustomerRequestDto } from './dto/update-customer-request.dto';
 import { CustomerEntity } from './entities/customer.entity';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('Customer')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -45,11 +47,15 @@ export class CustomerController {
   public create(
     @Body() dto: CreateCustomerRequestDto,
     @CurrentUser() user: UserEntity,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<CustomerResponseDto> {
-    return this.customerService.create({
-      ...dto,
-      createdById: user.id,
-    });
+    return this.customerService.create(
+      {
+        ...dto,
+        createdById: user.id,
+      },
+      logMeta,
+    );
   }
 
   @Get()
@@ -89,8 +95,9 @@ export class CustomerController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdateCustomerRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<CustomerResponseDto> {
-    return this.customerService.update(+id, dto);
+    return this.customerService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -98,7 +105,10 @@ export class CustomerController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.customerService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.customerService.remove(+id, logMeta);
   }
 }

@@ -27,6 +27,8 @@ import { VendorResponseDto } from './dto/vendor-response.dto';
 import { CurrentUser } from '@modules/auth/decorators/current-user.decorator';
 import { UserEntity } from '@modules/admin/system/user/entities/user.entity';
 import { VendorSelectOptionResponseDto } from './dto/vendor-select-option-response.dto';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('Vendor')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -45,11 +47,15 @@ export class VendorController {
   public create(
     @Body() dto: CreateVendorRequestDto,
     @CurrentUser() user: UserEntity,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<VendorResponseDto> {
-    return this.vendorService.create({
-      ...dto,
-      createdById: user.id,
-    });
+    return this.vendorService.create(
+      {
+        ...dto,
+        createdById: user.id,
+      },
+      logMeta,
+    );
   }
 
   @Get()
@@ -89,8 +95,9 @@ export class VendorController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdateVendorRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<VendorResponseDto> {
-    return this.vendorService.update(+id, dto);
+    return this.vendorService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -98,7 +105,10 @@ export class VendorController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.vendorService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.vendorService.remove(+id, logMeta);
   }
 }

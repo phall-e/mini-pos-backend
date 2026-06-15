@@ -9,6 +9,8 @@ import { CustomerSelectOptionResponseDto } from './dto/customer-select-option-re
 import { UpdateCustomerRequestDto } from './dto/update-customer-request.dto';
 import { CustomerEntity } from './entities/customer.entity';
 import { CustomerMapper } from './customer.mapper';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @Injectable()
 export class CustomerService extends BasePaginationCrudService<
@@ -39,6 +41,7 @@ export class CustomerService extends BasePaginationCrudService<
   constructor(
     @InjectRepository(CustomerEntity)
     private readonly customerRepository: Repository<CustomerEntity>,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -55,10 +58,18 @@ export class CustomerService extends BasePaginationCrudService<
 
   public async create(
     dto: CreateCustomerRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<CustomerResponseDto> {
     try {
       const entity = CustomerMapper.toCreateEntity(dto);
       const savedEntity = await this.customerRepository.save(entity);
+      await this.logActivityService.record({
+        userId: dto.createdById,
+        ...logMeta,
+        module: 'customer',
+        action: 'create',
+        description: `create Customer ${savedEntity.code}`,
+      });
       return CustomerMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
@@ -85,6 +96,7 @@ export class CustomerService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdateCustomerRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<CustomerResponseDto> {
     try {
       const entity = await this.customerRepository.findOne({
@@ -98,13 +110,19 @@ export class CustomerService extends BasePaginationCrudService<
 
       const updatedEntity = CustomerMapper.toUpdateEntity(entity, dto);
       const savedEntity = await this.customerRepository.save(updatedEntity);
+      await this.logActivityService.record({
+        ...logMeta,
+        module: 'customer',
+        action: 'update',
+        description: `update Customer ${savedEntity.code}`,
+      });
       return CustomerMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
     }
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
       const entity = await this.customerRepository.findOne({
         where: {
@@ -116,6 +134,13 @@ export class CustomerService extends BasePaginationCrudService<
       }
 
       await this.customerRepository.softRemove(entity);
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? entity.createdById,
+        module: 'customer',
+        action: 'delete',
+        description: `delete Customer ${entity.code}`,
+      });
     } catch (error) {
       handleError(error);
     }

@@ -27,6 +27,8 @@ import { ApiPaginatedResponse } from '@libs/common/paginations/api-paginated-res
 import { CurrentUser } from '@modules/auth/decorators/current-user.decorator';
 import { UserEntity } from '@modules/admin/system/user/entities/user.entity';
 import { ProductSelectOptionResponseDto } from './dto/product-select-option-response.dto';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('Product')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -45,11 +47,15 @@ export class ProductController {
   public create(
     @Body() dto: CreateProductRequestDto,
     @CurrentUser() user: UserEntity,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<ProductResponseDto> {
-    return this.productService.create({
-      ...dto,
-      createdById: user.id,
-    });
+    return this.productService.create(
+      {
+        ...dto,
+        createdById: user.id,
+      },
+      logMeta,
+    );
   }
 
   @Get()
@@ -89,8 +95,9 @@ export class ProductController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdateProductRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<ProductResponseDto> {
-    return this.productService.update(+id, dto);
+    return this.productService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -98,7 +105,10 @@ export class ProductController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.productService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.productService.remove(+id, logMeta);
   }
 }

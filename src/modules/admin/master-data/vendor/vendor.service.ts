@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { VendorMapper } from './vendor.mapper';
 import { handleError } from '@libs/utils/handle-error.util';
 import { VendorSelectOptionResponseDto } from './dto/vendor-select-option-response.dto';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @Injectable()
 export class VendorService extends BasePaginationCrudService<
@@ -38,6 +40,7 @@ export class VendorService extends BasePaginationCrudService<
   constructor(
     @InjectRepository(VendorEntity)
     private readonly vendorRepository: Repository<VendorEntity>,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -52,10 +55,20 @@ export class VendorService extends BasePaginationCrudService<
     return Promise.resolve(VendorMapper.toDto(entity));
   }
 
-  public async create(dto: CreateVendorRequestDto): Promise<VendorResponseDto> {
+  public async create(
+    dto: CreateVendorRequestDto,
+    logMeta?: LogActivityMeta,
+  ): Promise<VendorResponseDto> {
     try {
       const entity = VendorMapper.toCreateEntity(dto);
       const savedEntity = await this.vendorRepository.save(entity);
+      await this.logActivityService.record({
+        userId: dto.createdById,
+        ...logMeta,
+        module: 'vendor',
+        action: 'create',
+        description: `create Vendor ${savedEntity.code}`,
+      });
       return VendorMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
@@ -82,6 +95,7 @@ export class VendorService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdateVendorRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<VendorResponseDto> {
     try {
       const entity = await this.vendorRepository.findOne({
@@ -95,13 +109,19 @@ export class VendorService extends BasePaginationCrudService<
 
       const updatedEntity = VendorMapper.toUpdateEntity(entity, dto);
       const savedEntity = await this.vendorRepository.save(updatedEntity);
+      await this.logActivityService.record({
+        ...logMeta,
+        module: 'vendor',
+        action: 'update',
+        description: `update Vendor ${savedEntity.code}`,
+      });
       return VendorMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
     }
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
       const entity = await this.vendorRepository.findOne({
         where: {
@@ -113,6 +133,13 @@ export class VendorService extends BasePaginationCrudService<
       }
 
       await this.vendorRepository.softRemove(entity);
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? entity.createdById,
+        module: 'vendor',
+        action: 'delete',
+        description: `delete Vendor ${entity.code}`,
+      });
     } catch (error) {
       handleError(error);
     }
