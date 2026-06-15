@@ -28,6 +28,8 @@ import { PurchaseOrderResponseDto } from './dto/purchase-order-response.dto';
 import { PurchaseOrderSelectOptionResponseDto } from './dto/purchase-order-select-option-response.dto';
 import { UpdatePurchaseOrderRequestDto } from './dto/update-purchase-order-request.dto';
 import { PurchaseOrderEntity } from './entities/purchase-order.entity';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('Purchase Order')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -46,11 +48,15 @@ export class PurchaseOrderController {
   public create(
     @Body() dto: CreatePurchaseOrderRequestDto,
     @CurrentUser() user: UserEntity,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<PurchaseOrderResponseDto> {
-    return this.purchaseOrderService.create({
-      ...dto,
-      createdById: user.id,
-    });
+    return this.purchaseOrderService.create(
+      {
+        ...dto,
+        createdById: user.id,
+      },
+      logMeta,
+    );
   }
 
   @Get()
@@ -101,8 +107,9 @@ export class PurchaseOrderController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdatePurchaseOrderRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<PurchaseOrderResponseDto> {
-    return this.purchaseOrderService.update(+id, dto);
+    return this.purchaseOrderService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -110,7 +117,10 @@ export class PurchaseOrderController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.purchaseOrderService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.purchaseOrderService.remove(+id, logMeta);
   }
 }

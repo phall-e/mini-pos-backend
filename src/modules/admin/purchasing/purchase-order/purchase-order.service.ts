@@ -21,6 +21,8 @@ import {
 import { PurchaseOrderItemEntity } from './entities/purchase-order-item.entity';
 import { PurchaseOrderItemMapper } from './purchase-order-item-mapper';
 import { PurchaseOrderMapper } from './purchase-order-mapper';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @Injectable()
 export class PurchaseOrderService extends BasePaginationCrudService<
@@ -52,6 +54,7 @@ export class PurchaseOrderService extends BasePaginationCrudService<
     @InjectRepository(PurchaseOrderItemEntity)
     private readonly purchaseOrderItemRepository: Repository<PurchaseOrderItemEntity>,
     private readonly dataSource: DataSource,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -68,6 +71,7 @@ export class PurchaseOrderService extends BasePaginationCrudService<
 
   public async create(
     dto: CreatePurchaseOrderRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<PurchaseOrderResponseDto> {
     try {
       const savedEntity = await this.dataSource.transaction(async (manager) => {
@@ -88,6 +92,13 @@ export class PurchaseOrderService extends BasePaginationCrudService<
         return this.findEntityById(savedPurchaseOrder.id, manager);
       });
 
+      await this.logActivityService.record({
+        userId: dto.createdById,
+        ...logMeta,
+        module: 'purchase-order',
+        action: 'create',
+        description: `create Purchase Order ${savedEntity.code}`,
+      });
       return PurchaseOrderMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
@@ -145,6 +156,7 @@ export class PurchaseOrderService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdatePurchaseOrderRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<PurchaseOrderResponseDto> {
     try {
       const savedEntity = await this.dataSource.transaction(async (manager) => {
@@ -163,14 +175,23 @@ export class PurchaseOrderService extends BasePaginationCrudService<
         return this.findEntityById(id, manager);
       });
 
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? savedEntity.createdById,
+        module: 'purchase-order',
+        action: 'update',
+        description: `update Purchase Order ${savedEntity.code}`,
+      });
       return PurchaseOrderMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
     }
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
+      let removedEntity: PurchaseOrderEntity;
+
       await this.dataSource.transaction(async (manager) => {
         const entity = await this.findEntityById(id, manager);
         if (!entity) {
@@ -182,6 +203,15 @@ export class PurchaseOrderService extends BasePaginationCrudService<
         }
 
         await manager.softRemove(PurchaseOrderEntity, entity);
+        removedEntity = entity;
+      });
+
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? removedEntity.createdById,
+        module: 'purchase-order',
+        action: 'delete',
+        description: `delete Purchase Order ${removedEntity.code}`,
       });
     } catch (error) {
       handleError(error);
