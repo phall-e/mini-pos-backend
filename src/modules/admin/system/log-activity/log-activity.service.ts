@@ -7,6 +7,16 @@ import { CreateLogActivityRequestDto } from './dto/create-log-activity-request.d
 import { LogActivityResponseDto } from './dto/log-activity-response.dto';
 import { LogActivityEntity } from './entities/log-activity.entity';
 import { LogActivityMapper } from './log-activity.mapper';
+import {
+  LogActivityAction,
+  LogActivityMeta,
+} from './types/log-activity-meta.type';
+
+type RecordLogActivityOptions = LogActivityMeta & {
+  module: string;
+  action: LogActivityAction;
+  description?: string | null;
+};
 
 @Injectable()
 export class LogActivityService extends BasePaginationCrudService<
@@ -58,6 +68,21 @@ export class LogActivityService extends BasePaginationCrudService<
       return LogActivityMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
+    }
+  }
+
+  public async record(options: RecordLogActivityOptions): Promise<void> {
+    try {
+      await this.create({
+        userId: options.userId,
+        module: options.module,
+        action: options.action,
+        description: options.description,
+        ipAddress: options.ipAddress,
+        userAgent: options.userAgent,
+      });
+    } catch (error) {
+      console.error('[LOG_ACTIVITY_ERROR]', error);
     }
   }
 

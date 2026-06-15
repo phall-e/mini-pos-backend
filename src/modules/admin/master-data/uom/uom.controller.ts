@@ -27,6 +27,8 @@ import { CurrentUser } from '@modules/auth/decorators/current-user.decorator';
 import { UserEntity } from '@modules/admin/system/user/entities/user.entity';
 import { Permissions } from '@modules/auth/decorators/permissions.decorator';
 import { UomSelectOptionResponseDto } from './dto/uom-select-option-response.dto';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('UOM')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -45,11 +47,15 @@ export class UomController {
   public create(
     @Body() dto: CreateUomRequestDto,
     @CurrentUser() user: UserEntity,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<UomResponseDto> {
-    return this.uomService.create({
-      ...dto,
-      createdById: user.id,
-    });
+    return this.uomService.create(
+      {
+        ...dto,
+        createdById: user.id,
+      },
+      logMeta,
+    );
   }
 
   @Get()
@@ -89,8 +95,9 @@ export class UomController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdateUomRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<UomResponseDto> {
-    return this.uomService.update(+id, dto);
+    return this.uomService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -98,7 +105,10 @@ export class UomController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.uomService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.uomService.remove(+id, logMeta);
   }
 }

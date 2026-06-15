@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { UomMapper } from './uom.mapper';
 import { handleError } from '@libs/utils/handle-error.util';
 import { UomSelectOptionResponseDto } from './dto/uom-select-option-response.dto';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @Injectable()
 export class UomService extends BasePaginationCrudService<
@@ -29,6 +31,7 @@ export class UomService extends BasePaginationCrudService<
   constructor(
     @InjectRepository(UomEntity)
     private readonly uomRepository: Repository<UomEntity>,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -43,10 +46,20 @@ export class UomService extends BasePaginationCrudService<
     return UomMapper.toDto(entity);
   }
 
-  public async create(dto: CreateUomRequestDto): Promise<UomResponseDto> {
+  public async create(
+    dto: CreateUomRequestDto,
+    logMeta?: LogActivityMeta,
+  ): Promise<UomResponseDto> {
     try {
       const entity = UomMapper.toCreateEntity(dto);
       const savedEntity = await this.uomRepository.save(entity);
+      await this.logActivityService.record({
+        userId: dto.createdById,
+        ...logMeta,
+        module: 'uom',
+        action: 'create',
+        description: `create UOM ${savedEntity.code}`,
+      });
       return await UomMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
@@ -72,6 +85,7 @@ export class UomService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdateUomRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<UomResponseDto> {
     try {
       const entity = await this.uomRepository.findOne({
@@ -85,13 +99,19 @@ export class UomService extends BasePaginationCrudService<
 
       const updatedEntity = UomMapper.toUpdateEntity(entity, dto);
       const savedEntity = await this.uomRepository.save(updatedEntity);
+      await this.logActivityService.record({
+        ...logMeta,
+        module: 'uom',
+        action: 'update',
+        description: `update UOM ${savedEntity.code}`,
+      });
       return await UomMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
     }
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
       const entity = await this.uomRepository.findOne({
         where: {
@@ -102,6 +122,13 @@ export class UomService extends BasePaginationCrudService<
         throw new NotFoundException('UOM not found');
       }
       await this.uomRepository.softRemove(entity);
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? entity.createdById,
+        module: 'uom',
+        action: 'delete',
+        description: `delete UOM ${entity.code}`,
+      });
     } catch (error) {
       handleError(error);
     }
