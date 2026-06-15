@@ -11,37 +11,39 @@ import { ConfigService } from '@nestjs/config';
 import { UserModule } from '@modules/admin/system/user/user.module';
 import { AuthController } from './auth.controller';
 import { TelegramModule } from '@modules/admin/system/telegram/telegram.module';
+import { LogActivityModule } from '@modules/admin/system/log-activity/log-activity.module';
 
 @Module({
-    imports: [
-        PassportModule.register({ 
-            defaultStrategy: 'jwt', 
-        }),
-        JwtModule.registerAsync({
-            useFactory: (configService: ConfigService): JwtModuleOptions => ({
-                secret: configService.get<string>('JWT_SECRET'),
-                signOptions: {
-                    expiresIn: configService.get<any>('JWT_EXPIRES_IN'),
-                },
-            }),
-            inject: [ConfigService],
-        }),
-        UserModule,
-        TelegramModule,
-    ],
-    providers: [
-        AuthService,
-        TokenService,
-        JwtStrategy,
-        {
-            provide: APP_GUARD,
-            useClass: JwtAuthGuard,
+  imports: [
+    PassportModule.register({
+      defaultStrategy: 'jwt',
+    }),
+    JwtModule.registerAsync({
+      useFactory: (configService: ConfigService): JwtModuleOptions => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.get<any>('JWT_EXPIRES_IN'),
         },
-        {
-            provide: APP_GUARD,
-            useClass: PermissionGuard,
-        }
-    ],
-    controllers: [AuthController],
+      }),
+      inject: [ConfigService],
+    }),
+    UserModule,
+    TelegramModule,
+    LogActivityModule,
+  ],
+  providers: [
+    AuthService,
+    TokenService,
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
+    },
+  ],
+  controllers: [AuthController],
 })
 export class AuthModule {}
