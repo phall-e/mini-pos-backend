@@ -12,6 +12,8 @@ import { PaymentSettingEntity } from './entities/payment-setting.entity';
 import { PaymentSettingMapper } from './payment-setting.mapper';
 import { GenerateQrCodeRequestDto } from './dto/generate-qr-code-request.dto';
 import { TelegramService } from '@modules/admin/system/telegram/telegram.service';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 const { BakongKHQR, khqrData, MerchantInfo } = require('bakong-khqr');
 
@@ -60,6 +62,7 @@ export class PaymentSettingService extends BasePaginationCrudService<
     @InjectRepository(PaymentSettingEntity)
     private readonly paymentSettingRepository: Repository<PaymentSettingEntity>,
     private readonly telegramService: TelegramService,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -76,10 +79,18 @@ export class PaymentSettingService extends BasePaginationCrudService<
 
   public async create(
     dto: CreatePaymentSettingRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<PaymentSettingResponseDto> {
     try {
       const entity = PaymentSettingMapper.toCreateEntity(dto);
       const savedEntity = await this.paymentSettingRepository.save(entity);
+      await this.logActivityService.record({
+        userId: dto.createdById,
+        ...logMeta,
+        module: 'payment-setting',
+        action: 'create',
+        description: `create Payment Setting ${savedEntity.name}`,
+      });
       return PaymentSettingMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
@@ -133,6 +144,7 @@ export class PaymentSettingService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdatePaymentSettingRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<PaymentSettingResponseDto> {
     try {
       const entity = await this.paymentSettingRepository.findOne({
@@ -147,13 +159,20 @@ export class PaymentSettingService extends BasePaginationCrudService<
       const updatedEntity = PaymentSettingMapper.toUpdateEntity(entity, dto);
       const savedEntity =
         await this.paymentSettingRepository.save(updatedEntity);
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? savedEntity.createdById,
+        module: 'payment-setting',
+        action: 'update',
+        description: `update Payment Setting ${savedEntity.name}`,
+      });
       return PaymentSettingMapper.toDto(savedEntity);
     } catch (error) {
       handleError(error);
     }
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
       const entity = await this.paymentSettingRepository.findOne({
         where: {
@@ -165,6 +184,13 @@ export class PaymentSettingService extends BasePaginationCrudService<
       }
 
       await this.paymentSettingRepository.softRemove(entity);
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? entity.createdById,
+        module: 'payment-setting',
+        action: 'delete',
+        description: `delete Payment Setting ${entity.name}`,
+      });
     } catch (error) {
       handleError(error);
     }
@@ -218,7 +244,7 @@ export class PaymentSettingService extends BasePaginationCrudService<
   }
 
   // Verify KHQR
-  public async verifyKHQR (khqr: string, saleNumber: string): Promise<boolean> {
+  public async verifyKHQR(khqr: string, saleNumber: string): Promise<boolean> {
     try {
       const KHQRString = khqr;
       const isKHQR = BakongKHQR.verify(KHQRString).isValid;

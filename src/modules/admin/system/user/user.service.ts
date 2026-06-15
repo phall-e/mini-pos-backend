@@ -19,21 +19,40 @@ import { generateOpt } from '@libs/utils/otp-generator.util';
 import { ResetUserPasswordRequestDto } from './dto/reset-user-password-request.dto';
 import { VerifyResetUserPasswordRequestDto } from './dto/verify-reset-user-password-request.dto';
 import { UserActionResponseDto } from './dto/user-action-response.dto';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @Injectable()
 export class UserService extends BasePaginationCrudService<
   UserEntity,
   UserResponseDto
 > {
-  protected SORTABLE_COLUMNS = ['id', 'username', 'isAdmin', 'isActive', 'isRequiredOtp'];
-  protected FILTER_COLUMNS = ['username', 'isAdmin', 'isActive', 'isRequiredOtp'];
-  protected SEARCHABLE_COLUMNS = ['username', 'isAdmin', 'isActive', 'isRequiredOtp'];
+  protected SORTABLE_COLUMNS = [
+    'id',
+    'username',
+    'isAdmin',
+    'isActive',
+    'isRequiredOtp',
+  ];
+  protected FILTER_COLUMNS = [
+    'username',
+    'isAdmin',
+    'isActive',
+    'isRequiredOtp',
+  ];
+  protected SEARCHABLE_COLUMNS = [
+    'username',
+    'isAdmin',
+    'isActive',
+    'isRequiredOtp',
+  ];
   protected RELATIONSIP_FIELDS = ['roles'];
 
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
     private readonly telegramService: TelegramService,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -48,7 +67,10 @@ export class UserService extends BasePaginationCrudService<
     return UserMapper.toDtoWithRelationship(entities);
   }
 
-  public async create(dto: CreateUserRequestDto): Promise<UserResponseDto> {
+  public async create(
+    dto: CreateUserRequestDto,
+    logMeta?: LogActivityMeta,
+  ): Promise<UserResponseDto> {
     try {
       let entity = UserMapper.toCreateEntity({
         ...dto,
@@ -63,6 +85,12 @@ export class UserService extends BasePaginationCrudService<
           .of(entity.id) // or entity
           .add(dto.roles);
       }
+      await this.logActivityService.record({
+        ...logMeta,
+        module: 'user',
+        action: 'create',
+        description: `create User ${entity.username}`,
+      });
       return UserMapper.toDto(entity);
     } catch (error) {
       handleError(error);
@@ -122,6 +150,7 @@ export class UserService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdateUserRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<UserResponseDto> {
     try {
       const entity = await this.userRepository.findOne({
@@ -159,6 +188,13 @@ export class UserService extends BasePaginationCrudService<
         }
       }
 
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? id,
+        module: 'user',
+        action: 'update',
+        description: `update User ${updatedEntity.username}`,
+      });
       return this.findOne(id);
     } catch (error) {
       handleError(error);
@@ -182,7 +218,7 @@ export class UserService extends BasePaginationCrudService<
     );
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
       const entity = await this.userRepository.findOne({
         where: {
@@ -194,6 +230,13 @@ export class UserService extends BasePaginationCrudService<
       }
 
       await this.userRepository.softRemove(entity);
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? id,
+        module: 'user',
+        action: 'delete',
+        description: `delete User ${entity.username}`,
+      });
     } catch (error) {
       handleError(error);
     }
@@ -202,6 +245,7 @@ export class UserService extends BasePaginationCrudService<
   public async resetPassword(
     id: number,
     dto: ResetUserPasswordRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<UserActionResponseDto> {
     try {
       const entity = await this.userRepository.findOne({
@@ -230,6 +274,13 @@ export class UserService extends BasePaginationCrudService<
         entity.telegramChatId,
         `Your password reset OTP is ${otp}`,
       );
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? id,
+        module: 'user',
+        action: 'reset-password',
+        description: `request password reset for User ${entity.username}`,
+      });
 
       return {
         success: true,
@@ -244,6 +295,7 @@ export class UserService extends BasePaginationCrudService<
   public async verifyResetPassword(
     id: number,
     dto: VerifyResetUserPasswordRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<UserActionResponseDto> {
     try {
       const entity = await this.userRepository.findOne({
@@ -267,6 +319,13 @@ export class UserService extends BasePaginationCrudService<
           otpCode: null,
         },
       );
+      await this.logActivityService.record({
+        ...logMeta,
+        userId: logMeta?.userId ?? id,
+        module: 'user',
+        action: 'verify-reset-password',
+        description: `verify password reset for User ${entity.username}`,
+      });
 
       return {
         success: true,

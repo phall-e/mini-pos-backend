@@ -25,6 +25,8 @@ import { RoleEntity } from './entities/role.entity';
 import { SWAGGER_TOKEN_NAME } from 'src/swagger/config';
 import { Permissions } from '@modules/auth/decorators/permissions.decorator';
 import { RoleSelectOptionResponseDto } from './dto/role-select-option-response.dto';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('Role')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -40,8 +42,11 @@ export class RoleController {
   @ApiResponse({ status: 201, type: RoleResponseDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public create(@Body() dto: CreateRoleRequestDto): Promise<RoleResponseDto> {
-    return this.roleService.create(dto);
+  public create(
+    @Body() dto: CreateRoleRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<RoleResponseDto> {
+    return this.roleService.create(dto, logMeta);
   }
 
   @Get()
@@ -79,8 +84,9 @@ export class RoleController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdateRoleRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<RoleResponseDto> {
-    return this.roleService.update(+id, dto);
+    return this.roleService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -88,7 +94,10 @@ export class RoleController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.roleService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.roleService.remove(+id, logMeta);
   }
 }

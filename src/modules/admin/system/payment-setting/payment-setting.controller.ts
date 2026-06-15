@@ -32,6 +32,8 @@ import { PaymentSettingEntity } from './entities/payment-setting.entity';
 import { PaymentSettingService } from './payment-setting.service';
 import { SkipAuth } from '@modules/auth/decorators/skip-auth.decorator';
 import { GenerateQrCodeRequestDto } from './dto/generate-qr-code-request.dto';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('Payment Setting')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -50,11 +52,15 @@ export class PaymentSettingController {
   public create(
     @Body() dto: CreatePaymentSettingRequestDto,
     @CurrentUser() user: UserEntity,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<PaymentSettingResponseDto> {
-    return this.paymentSettingService.create({
-      ...dto,
-      createdById: user.id,
-    });
+    return this.paymentSettingService.create(
+      {
+        ...dto,
+        createdById: user.id,
+      },
+      logMeta,
+    );
   }
 
   @Get()
@@ -76,7 +82,9 @@ export class PaymentSettingController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiNotFoundResponse({ description: 'Not found' })
-  public generateKhrString(@Query() dto: GenerateQrCodeRequestDto): Promise<any> {
+  public generateKhrString(
+    @Query() dto: GenerateQrCodeRequestDto,
+  ): Promise<any> {
     return this.paymentSettingService.generateQrCode(dto);
   }
 
@@ -85,10 +93,12 @@ export class PaymentSettingController {
   @ApiResponse({ status: 200, type: Boolean })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public verifyKHQR(@Param('khqr') khqr: string, @Param('saleNumber') saleNumber: string): Promise<boolean> {
+  public verifyKHQR(
+    @Param('khqr') khqr: string,
+    @Param('saleNumber') saleNumber: string,
+  ): Promise<boolean> {
     return this.paymentSettingService.verifyKHQR(khqr, saleNumber);
   }
-
 
   @Get('select-options')
   @Permissions('sale-create')
@@ -118,8 +128,9 @@ export class PaymentSettingController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdatePaymentSettingRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<PaymentSettingResponseDto> {
-    return this.paymentSettingService.update(+id, dto);
+    return this.paymentSettingService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -127,7 +138,10 @@ export class PaymentSettingController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.paymentSettingService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.paymentSettingService.remove(+id, logMeta);
   }
 }

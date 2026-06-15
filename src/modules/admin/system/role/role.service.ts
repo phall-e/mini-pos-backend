@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { RoleMapper } from './role.mapper';
 import { handleError } from '@libs/utils/handle-error.util';
 import { RoleSelectOptionResponseDto } from './dto/role-select-option-response.dto';
+import { LogActivityService } from '@modules/admin/system/log-activity/log-activity.service';
+import { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @Injectable()
 export class RoleService extends BasePaginationCrudService<
@@ -23,6 +25,7 @@ export class RoleService extends BasePaginationCrudService<
   constructor(
     @InjectRepository(RoleEntity)
     private readonly roleRepository: Repository<RoleEntity>,
+    private readonly logActivityService: LogActivityService,
   ) {
     super();
   }
@@ -37,7 +40,10 @@ export class RoleService extends BasePaginationCrudService<
     return RoleMapper.toDto(entity);
   }
 
-  public async create(dto: CreateRoleRequestDto): Promise<RoleResponseDto> {
+  public async create(
+    dto: CreateRoleRequestDto,
+    logMeta?: LogActivityMeta,
+  ): Promise<RoleResponseDto> {
     try {
       const entity = RoleMapper.toCreateEntity(dto);
       const savedEntity = await this.roleRepository.save(entity);
@@ -50,6 +56,12 @@ export class RoleService extends BasePaginationCrudService<
           .add(dto.permissions);
       }
 
+      await this.logActivityService.record({
+        ...logMeta,
+        module: 'role',
+        action: 'create',
+        description: `create Role ${savedEntity.name}`,
+      });
       return this.findOne(savedEntity.id);
     } catch (error) {
       handleError(error);
@@ -97,6 +109,7 @@ export class RoleService extends BasePaginationCrudService<
   public async update(
     id: number,
     dto: UpdateRoleRequestDto,
+    logMeta?: LogActivityMeta,
   ): Promise<RoleResponseDto> {
     try {
       const entity = await this.roleRepository.findOne({
@@ -136,13 +149,19 @@ export class RoleService extends BasePaginationCrudService<
         }
       }
 
+      await this.logActivityService.record({
+        ...logMeta,
+        module: 'role',
+        action: 'update',
+        description: `update Role ${updatedEntity.name}`,
+      });
       return this.findOne(id);
     } catch (error) {
       handleError(error);
     }
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number, logMeta?: LogActivityMeta): Promise<void> {
     try {
       const entity = await this.roleRepository.findOne({
         where: {
@@ -154,6 +173,12 @@ export class RoleService extends BasePaginationCrudService<
       }
 
       await this.roleRepository.softRemove(entity);
+      await this.logActivityService.record({
+        ...logMeta,
+        module: 'role',
+        action: 'delete',
+        description: `delete Role ${entity.name}`,
+      });
     } catch (error) {
       handleError(error);
     }

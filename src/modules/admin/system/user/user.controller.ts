@@ -27,6 +27,8 @@ import { PaginatedResponse } from '@libs/common/paginations/paginated-response.t
 import { ResetUserPasswordRequestDto } from './dto/reset-user-password-request.dto';
 import { VerifyResetUserPasswordRequestDto } from './dto/verify-reset-user-password-request.dto';
 import { UserActionResponseDto } from './dto/user-action-response.dto';
+import { LogActivityRequestMeta } from '@modules/admin/system/log-activity/decorators/log-activity-meta.decorator';
+import type { LogActivityMeta } from '@modules/admin/system/log-activity/types/log-activity-meta.type';
 
 @ApiTags('User')
 @ApiBearerAuth(SWAGGER_TOKEN_NAME)
@@ -42,8 +44,11 @@ export class UserController {
   @ApiResponse({ status: 201, type: UserResponseDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public create(@Body() dto: CreateUserRequestDto): Promise<UserResponseDto> {
-    return this.userService.create(dto);
+  public create(
+    @Body() dto: CreateUserRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<UserResponseDto> {
+    return this.userService.create(dto, logMeta);
   }
 
   @Get()
@@ -100,8 +105,9 @@ export class UserController {
   public update(
     @Param('id') id: string,
     @Body() dto: UpdateUserRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<UserResponseDto> {
-    return this.userService.update(+id, dto);
+    return this.userService.update(+id, dto, logMeta);
   }
 
   @Delete(':id')
@@ -109,8 +115,11 @@ export class UserController {
   @ApiResponse({ status: 200 })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  public remove(@Param('id') id: string): Promise<void> {
-    return this.userService.remove(+id);
+  public remove(
+    @Param('id') id: string,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
+  ): Promise<void> {
+    return this.userService.remove(+id, logMeta);
   }
 
   @Post(':id/reset-password')
@@ -121,8 +130,9 @@ export class UserController {
   public resetPassword(
     @Param('id') id: string,
     @Body() dto: ResetUserPasswordRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<UserActionResponseDto> {
-    return this.userService.resetPassword(+id, dto);
+    return this.userService.resetPassword(+id, dto, logMeta);
   }
 
   @Post(':id/reset-password/verify-otp')
@@ -133,7 +143,8 @@ export class UserController {
   public verifyResetPassword(
     @Param('id') id: string,
     @Body() dto: VerifyResetUserPasswordRequestDto,
+    @LogActivityRequestMeta() logMeta: LogActivityMeta,
   ): Promise<UserActionResponseDto> {
-    return this.userService.verifyResetPassword(+id, dto);
+    return this.userService.verifyResetPassword(+id, dto, logMeta);
   }
 }
